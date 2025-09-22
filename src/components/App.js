@@ -1,9 +1,10 @@
 import DnsmasqApi from 'dnsmasq-api';
+import DhcpTable from './DhcpTable.js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 const App = () => {
   const [configContent, setConfigContent] = useState('');
-  const [leasesContent, setLeasesContent] = useState('Loading leases...');
+  const [leasesContent, setLeasesContent] = useState(null);
   const [notification, setNotification] = useState(null);
 
   // Load configuration
@@ -85,9 +86,8 @@ const App = () => {
               <h3 className="panel-title">DNS Leases</h3>
             </div>
             <div className="panel-body">
-              <div id="leases-container">
-                <pre className="textblock">{leasesContent}</pre>
-              </div>
+              { /*typeof leasesContent*/ null }
+              { leasesContent ? <DhcpTable data={leasesContent} /> : null }
               <button onClick={loadLeases} className="btn btn-default">Refresh Leases</button>
             </div>
           </div>

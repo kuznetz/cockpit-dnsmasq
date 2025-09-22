@@ -1,4 +1,5 @@
 import cockpit from 'cockpit';
+import DnsmasqLeasesParser from './leases-parser.js';
 
 class DnsmasqApi {
   // System service operations
@@ -32,7 +33,10 @@ class DnsmasqApi {
   }
 
   static async readLeases() {
-    return cockpit.file("/var/lib/misc/dnsmasq.leases").read();
+    let txt = await cockpit.file("/var/lib/misc/dnsmasq.leases").read();
+    let result = DnsmasqLeasesParser.parse(txt)
+    console.log('result', result)
+    return result
   }
 
   // Log operations

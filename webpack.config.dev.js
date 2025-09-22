@@ -5,6 +5,14 @@ module.exports = {
   ...commonConfig,
   mode: 'development',
 
+  output: {
+    filename: 'bundle.js',
+    publicPath: '/',
+    path: path.join(__dirname, 'dist'),
+    clean: true,
+    asyncChunks: false
+  },
+
   devServer: {
     static: path.join(__dirname, 'public'),
     compress: false,

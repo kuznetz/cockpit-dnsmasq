@@ -12,10 +12,9 @@
     "cockpit": "239"
   },  
   "menu": {
-    "dnsmasq": {
-      "name": "Dnsmasq",
-      "weight": 100,
-      "component": "dnsmasq"
+    "index": {
+      "label": "Dnsmasq (DNS/DHCP)",
+      "weight": 100
     }
   },
   "tools": {
