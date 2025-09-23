@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 const ServiceStatus = () => {
   const [serviceStatus, setServiceStatus] = useState('Checking...');
-  const [notification, setNotification] = useState(null);
 
   // Update buttons based on status
   const showButtons = useCallback(() => {
@@ -61,20 +60,13 @@ const ServiceStatus = () => {
     }    
   };
 
-  const showNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-  };
-
   // Initialize
   useEffect(() => {
     checkStatus();
     // Refresh status every 10 seconds
     const interval = setInterval(checkStatus, 10000);
     return () => clearInterval(interval);
-  }, [checkStatus, loadConfig, loadLeases, loadLogs]);
+  }, [checkStatus]);
 
   const buttons = showButtons();
 

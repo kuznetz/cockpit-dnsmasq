@@ -1,10 +1,12 @@
 import DnsmasqApi from 'dnsmasq-api';
+import ServiceStatus from './ServiceStatus.js';
 import DhcpTable from './DhcpTable.js';
 import ConfigEditor from './ConfigEditor.js';
+import HostsTable from './HostsTable.js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 const App = () => {
-  const [configContent, setConfigContent] = useState('');
+  const [configContent, setConfigContent] = useState(null);
   const [leasesContent, setLeasesContent] = useState(null);
   const [notification, setNotification] = useState(null);
 
@@ -93,29 +95,19 @@ const App = () => {
             </div>
           </div>
 
+          <HostsTable />
+
           { configContent ? <ConfigEditor initialConfig={configContent} onSave={()=>{}} /> : null }
 
-          {/* Configuration */}
-          <div className="panel panel-default">
-            <div className="panel-heading">
-              <h3 className="panel-title">Configuration</h3>
-            </div>
-            <div className="panel-body">
-              <div style={{ height: "300px", display: "flex", flexDirection: "column" }}>
-                <textarea 
-                  value={configContent} 
-                  onChange={(e) => setConfigContent(e.target.value)}
-                  className="textblock" 
-                  style={{ flex: 1 }}
-                />
-              </div>
+          {/* Configuration
               <button onClick={handleSaveConfig} className="btn btn-primary">Save Configuration</button>
               <button onClick={handleReloadConfig} className="btn btn-info">Reload Configuration</button>
-            </div>
-          </div>
+          */}
 
         </div>
       </div>
+
+      <ServiceStatus />
     </div>
   );
 };
