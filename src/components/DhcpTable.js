@@ -37,7 +37,8 @@ const DhcpTable = ({ data }) => {
             <th>MAC Address</th>
             <th>IP Address</th>
             <th>Hostname</th>
-            <th>Client ID</th>
+            {/*<th>Client ID</th>*/}
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -54,8 +55,12 @@ const DhcpTable = ({ data }) => {
               <td >{item.mac}</td>
               <td >{item.ip}</td>
               <td >{item.hostname}</td>
-              <td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+              {/*<td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
                 {item.clientId}
+              </td>*/}
+              <td >
+                <button>remove</button>
+                <button>add permanent</button>
               </td>
             </tr>
           ))}

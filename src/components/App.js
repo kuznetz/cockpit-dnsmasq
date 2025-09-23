@@ -1,5 +1,6 @@
 import DnsmasqApi from 'dnsmasq-api';
 import DhcpTable from './DhcpTable.js';
+import ConfigEditor from './ConfigEditor.js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 const App = () => {
@@ -91,6 +92,8 @@ const App = () => {
               <button onClick={loadLeases} className="btn btn-default">Refresh Leases</button>
             </div>
           </div>
+
+          { configContent ? <ConfigEditor initialConfig={configContent} onSave={()=>{}} /> : null }
 
           {/* Configuration */}
           <div className="panel panel-default">

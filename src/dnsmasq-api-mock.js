@@ -1,4 +1,5 @@
 import DnsmasqLeasesParser from './leases-parser.js';
+import DnsmasqConfigParser from './config-parser-single.js'
 
 class DnsmasqApi {
   // System service operations
@@ -23,7 +24,30 @@ class DnsmasqApi {
   }
 
   static async readConfig() {
-    return ``
+    let txt = `# Single Interface
+interface=eth0
+
+# Prevent dnsmasq from binding to any interface except specified ones
+bind-interfaces
+
+# DHCP range for eth0 interface
+# Office LAN (eth0)
+dhcp-range=192.168.10.100,192.168.10.200,255.255.255.0,24h
+dhcp-option=3,192.168.10.1        # Gateway
+dhcp-option=6,192.168.10.1        # DNS
+dhcp-option=15,office.local       # Domain
+dhcp-option=28,192.168.10.255     # Broadcast
+
+# Static leases for eth0
+# Office devices
+dhcp-host=aa:bb:cc:dd:ee:ff,192.168.10.50,office-printer,infinite
+dhcp-host=11:22:33:44:55:66,192.168.10.51,server,24h
+
+# Limit leases for eth0
+dhcp-lease-max=150`
+    let result = DnsmasqConfigParser.parse(txt)
+    console.log('readConfig', result)
+    return result
   }
 
   static async saveConfig(content) {
@@ -47,3 +71,41 @@ class DnsmasqApi {
 }
 
 export default DnsmasqApi;
+
+/*
+Create js parser for /etc/dnsmasq.conf, group result by interface, parser must support this configs:
+```
+# Multiple Interfaces
+interface=eth0
+interface=eth1
+
+# Prevent dnsmasq from binding to any interface except specified ones
+bind-interfaces
+
+# DHCP ranges for each interface
+# Office LAN (eth0)
+dhcp-range=eth0,192.168.10.100,192.168.10.200,255.255.255.0,24h
+dhcp-option=tag:eth0,3,192.168.10.1        # Gateway
+dhcp-option=tag:eth0,6,192.168.10.1        # DNS
+dhcp-option=tag:eth0,15,office.local       # Domain
+dhcp-option=tag:eth0,28,192.168.10.255     # Broadcast
+
+# Guest LAN (eth1)
+dhcp-range=eth1,192.168.20.100,192.168.20.200,255.255.255.0,6h
+dhcp-option=tag:eth1,3,192.168.20.1
+dhcp-option=tag:eth1,6,8.8.8.8,1.1.1.1
+dhcp-option=tag:eth1,15,guest.local
+
+# Static leases per interface
+# Office devices
+dhcp-host=aa:bb:cc:dd:ee:ff,192.168.10.50,office-printer,infinite,tag:eth0
+dhcp-host=11:22:33:44:55:66,192.168.10.51,server,24h,tag:eth0
+
+# Guest devices
+dhcp-host=22:33:44:55:66:77,192.168.20.30,guest-pc,6h,tag:eth1
+
+# Limit leases per interface
+dhcp-lease-max=150,tag:eth0
+dhcp-lease-max=50,tag:eth1
+```
+*/
