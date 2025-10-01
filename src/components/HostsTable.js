@@ -1,4 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Button, TextInput, Toolbar,
+  ToolbarContent, ToolbarItem, ActionList, ActionListItem,
+  Bullseye, EmptyState, EmptyStateBody, Title
+} from '@patternfly/react-core';
+import { Table, Thead, Tbody, TableVariant, Tr, Td, Th } from '@patternfly/react-table';
+import { EditIcon, TrashIcon, PlusIcon, SaveIcon, TimesIcon } from '@patternfly/react-icons';
+import PfSelect from './ui/pfSelect';
 
 const HostsTable = ({ leases, hosts, onChange }) => {
   const [newHosts, setNewHosts] = useState([]);
@@ -16,145 +24,239 @@ const HostsTable = ({ leases, hosts, onChange }) => {
     setNewHosts(newData);
   };
 
-  const addRow = () => {
+  const addRow = (value) => {
+    setNewLeaseId(value)
     let newRow = {
       mac: '',
       ip: '',
       hostname: '',
       leaseTime: '1h'
-    }
-    if (newLeaseId !== '') {
-      let newLease = leases[newLeaseId]
+    };
+    if (value !== '') {
+      let newLease = leases[value];
       newRow = {
         ...newRow,
         mac: newLease.mac,
         ip: newLease.ip,
         hostname: newLease.hostname        
-      }
+      };
     }
     const updatedHosts = [...newHosts, newRow];
     setNewHosts(updatedHosts);
-    setEditingData(null)
+    setEditingData(null);
     setEditingIndex(updatedHosts.length - 1);
+    setNewLeaseId('');
   };
 
   const removeRow = (index) => {
     const newData = newHosts.filter((_, i) => i !== index);
     setNewHosts(newData);
     setEditingIndex(null);
-    if (onChange) onChange(newData)
-  }
+    if (onChange) onChange(newData);
+  };
 
   const cancelEditing = (index) => {
     let resetData = [...newHosts];
     if (editingData) {
       resetData[index] = { ...editingData };
     } else {
-      resetData.splice(index, 1)
+      resetData.splice(index, 1);
     }
     setNewHosts(resetData);
     setEditingIndex(null);
-  }
+  };
 
   const startEditing = (index) => {
     setEditingIndex(index);
-    setEditingData({ ...newHosts[index] })
-  }
+    setEditingData({ ...newHosts[index] });
+  };
 
   const confirmEditing = () => {
-    setEditingIndex(null)
-    console.log('onChange',onChange)
-    if (onChange) onChange(newHosts)
-  }
+    setEditingIndex(null);
+    if (onChange) onChange(newHosts);
+  };
 
   const isRowEditable = (index) => {
     return editingIndex === index;
-  }
+  };
 
-  const filtredLeases = useMemo(() => {
-    return leases.filter((item) => newHosts.findIndex((h) => h.mac === item.mac) === -1)
-  }, [newHosts, leases]);  
+  const leasesOptions = useMemo(() => {
+    let options = leases.map((item, i) => {
+      let label = `${item.mac} (${item.ip})`
+      if (item.hostname) {
+        label += ` (${item.hostname})`
+      }
+      return { value: i, mac: item.mac, label }
+    })
+    let flt = options.filter((item) => newHosts.findIndex((h) => h.mac === item.mac) === -1);
+    return [{ label: 'Create empty' }, ...flt]
+  }, [newHosts, leases]);
+
+  const columns = [
+    { key: 'mac', title: 'MAC Address' },
+    { key: 'ip', title: 'IP Address' },
+    { key: 'hostname', title: 'Hostname' },
+    { key: 'leaseTime', title: 'Lease Time' },
+    { key: 'actions', title: 'Actions' }
+  ];
 
   return (
     <div>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>MAC Address</th>
-            <th>IP Address</th>
-            <th>Hostname</th>
-            <th>Lease Time</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {newHosts.map((item, index) => (
-            <tr key={index}>
-              <td>
-                <input
-                  type="text"
-                  value={item.mac}
-                  onChange={(e) => handleInputChange(index, 'mac', e.target.value)}
-                  placeholder="aa:bb:cc:dd:ee:ff"
-                  disabled={!isRowEditable(index)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={item.ip}
-                  onChange={(e) => handleInputChange(index, 'ip', e.target.value)}
-                  placeholder="192.168.10.50"
-                  disabled={!isRowEditable(index)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={item.hostname}
-                  onChange={(e) => handleInputChange(index, 'hostname', e.target.value)}
-                  placeholder="office-printer"
-                  disabled={!isRowEditable(index)}
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={item.leaseTime}
-                  onChange={(e) => handleInputChange(index, 'leaseTime', e.target.value)}
-                  placeholder="infinite"
-                  disabled={!isRowEditable(index)}
-                />
-              </td>
-              <td>
-                {isRowEditable(index) ? (
-                  <>
-                    <button onClick={confirmEditing}>Done</button>
-                    <button onClick={() => cancelEditing(index)}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => startEditing(index)}>Edit</button>
-                    <button onClick={() => removeRow(index)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {(editingIndex === null)? (
-        <div>
-          <select onChange={(e) => setNewLeaseId(e.target.value)} >
-            <option value="">Empty</option>
-            {filtredLeases.map((item,i) => 
-                (<option key={i} value={i}>{`${item.mac} / ${item.ip} / ${item.hostname}`}</option>)
-            )}          
-          </select>
-          <button onClick={addRow} style={{ marginTop: '10px' }}>Add</button>
-        </div>
-      ) : null}
-
+      <Table
+        variant={TableVariant.compact}
+        aria-label="Hosts table"
+      >
+        <Thead>
+          <Tr>
+            {columns.map(column => (
+              <Th key={column.key} sort={column.transforms}>
+                {column.title}
+              </Th>
+            ))}
+          </Tr>
+        </Thead>
+        <Tbody>
+          {newHosts.length === 0 ? (
+            <Tr>
+              <Td colSpan={columns.length}>
+                <Bullseye>
+                  <EmptyState icon={PlusIcon}>
+                    <Title headingLevel="h4" size="lg">
+                      No hosts configured
+                    </Title>
+                    <EmptyStateBody>
+                      Add a new host to get started.
+                    </EmptyStateBody>
+                  </EmptyState>
+                </Bullseye>
+              </Td>
+            </Tr>
+          ) : (
+            newHosts.map((item, index) => (
+              (isRowEditable(index)) ? (
+                <Tr key={index}>
+                  <Td>
+                    <TextInput
+                      value={item.mac}
+                      onChange={(value) => handleInputChange(index, 'mac', value)}
+                      placeholder="aa:bb:cc:dd:ee:ff"
+                      aria-label={`MAC address for row ${index + 1}`}
+                    />
+                  </Td>
+                  <Td>
+                    <TextInput
+                      value={item.ip}
+                      onChange={(value) => handleInputChange(index, 'ip', value)}
+                      placeholder="192.168.0.0"
+                      aria-label={`IP address for row ${index + 1}`}
+                    />
+                  </Td>
+                  <Td>
+                    <TextInput
+                      value={item.hostname}
+                      onChange={(value) => handleInputChange(index, 'hostname', value)}
+                      placeholder="hostname"
+                      aria-label={`Hostname for row ${index + 1}`}
+                    />
+                  </Td>
+                  <Td>
+                    <TextInput
+                      value={item.leaseTime}
+                      onChange={(value) => handleInputChange(index, 'leaseTime', value)}
+                      placeholder="infinite"
+                      aria-label={`Lease time for row ${index + 1}`}
+                    />
+                  </Td>
+                  <Td>
+                    <ActionList>
+                      <ActionListItem>
+                        <Button
+                          variant="primary"
+                          onClick={confirmEditing}
+                          icon={<SaveIcon />}
+                          aria-label="Save changes"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="link"
+                          onClick={() => cancelEditing(index)}
+                          icon={<TimesIcon />}
+                          aria-label="Cancel editing"
+                        >
+                          Cancel
+                        </Button>
+                      </ActionListItem>
+                    </ActionList>
+                  </Td>
+                </Tr>
+              ) : (
+                <Tr key={index}>
+                  <Td>
+                    {item.mac}
+                  </Td>
+                  <Td>
+                    {item.ip}
+                  </Td>
+                  <Td>
+                    {item.hostname}
+                  </Td>
+                  <Td>
+                    {item.leaseTime}
+                  </Td>
+                  <Td>
+                    <ActionList>
+                      <ActionListItem>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => startEditing(index)}
+                          icon={<EditIcon />}
+                          aria-label="Edit row"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => removeRow(index)}
+                          icon={<TrashIcon />}
+                          aria-label="Delete row"
+                        >
+                          Delete
+                        </Button>
+                      </ActionListItem>
+                    </ActionList>
+                  </Td>
+                </Tr>
+              )              
+            ))
+          )}
+          {editingIndex === null && (
+            <Tr>
+              <Td colSpan={4}>
+                <PfSelect 
+                  placeholder="Pre-fill with lease"
+                  options={leasesOptions}
+                  onChange={(value) => addRow(value)}
+                  />
+              </Td>
+              {/*
+              <Td>
+                <Button
+                  variant="primary"
+                  onClick={addRow}
+                  icon={<PlusIcon />}
+                  aria-label="Add new host"
+                >
+                  Add Host
+                </Button>              
+              </Td>
+              */}          
+            </Tr>
+          )}          
+        </Tbody>
+      </Table>
     </div>
   );
 };
