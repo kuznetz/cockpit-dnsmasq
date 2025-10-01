@@ -3,20 +3,25 @@ import ServiceStatus from './ServiceStatus.js';
 import DhcpTable from './DhcpTable.js';
 import ConfigEditor from './ConfigEditor.js';
 import HostsTable from './HostsTable.js';
+import DnsmasqConfigParser from '../config-parser-single.js'
 import React, { useState, useEffect, useCallback } from 'react';
 
 const App = () => {
-  const [configContent, setConfigContent] = useState(null);
-  const [leasesContent, setLeasesContent] = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const [configText, setConfigContent] = useState(null);
+  const [parsedConf, setParsedConf] = useState(null);
+  const [leases, setLeases] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  // Load configuration
   const loadConfig = useCallback(async () => {
     try {
-      const content = await DnsmasqApi.readConfig();
-      setConfigContent(content);
+      const content = await DnsmasqApi.readConfig()
+      const hosts = DnsmasqConfigParser.parse(content)
+      setParsedConf(hosts)
+      setConfigContent(content)
+      console.log('loadConfig',hosts,content)
     } catch (error) {
-      setConfigContent("Error reading configuration: " + error);
+      setConfigContent("Error reading configuration: " + error)
     }
   }, []);
 
@@ -24,11 +29,26 @@ const App = () => {
   const loadLeases = useCallback(async () => {
     try {
       const content = await DnsmasqApi.readLeases()
-      setLeasesContent(content);
+      setLeases(content);
+      console.log('loadLeases',content)
     } catch (error) {
-      setLeasesContent("Error reading leases: " + error);
+      setLeases("Error reading leases: " + error);
     }
   }, []);
+
+  useEffect(async () => {
+      setLoaded(false);
+      try {
+        // Load both config and leases in parallel
+        await Promise.all([
+          loadConfig(),
+          loadLeases()
+        ]);
+        setLoaded(true);
+      } catch (error) {
+        console.error("Failed to initialize application: " + error.message);
+      }
+  }, [loadConfig, loadLeases]);
 
   const handleReloadConfig = async () => {
     try {
@@ -46,20 +66,18 @@ const App = () => {
     }, 3000);
   };
 
+  const handleNewHosts = useCallback( async (newHosts) => {
+    console.log('newHosts', newHosts)
+  });
+
   const handleSaveConfig = async () => {
     try {
-      await DnsmasqApi.saveConfig(configContent);
+      await DnsmasqApi.saveConfig(configText);
       showNotification("Configuration saved successfully");
     } catch (error) {
       console.error("Failed to save configuration:", error);
     }
   };  
-
-  // Initialize
-  useEffect(() => {
-    loadConfig();
-    loadLeases();
-  }, [loadConfig, loadLeases]);
 
   return (
     <div className="container-fluid">
@@ -79,10 +97,10 @@ const App = () => {
         </div>
       )}
       
-      <div className="row">
-        <div className="col-md-12">
-          <h2>Dnsmasq</h2>
-          
+      <div>
+        <h2>Dnsmasq</h2>
+        { loaded? (
+        <div>         
           {/* DNS Leases */}
           <div className="panel panel-default">
             <div className="panel-heading">
@@ -90,14 +108,18 @@ const App = () => {
             </div>
             <div className="panel-body">
               { /*typeof leasesContent*/ null }
-              { leasesContent ? <DhcpTable data={leasesContent} /> : null }
+              { leases ? <DhcpTable data={leases} /> : null }
               <button onClick={loadLeases} className="btn btn-default">Refresh Leases</button>
             </div>
           </div>
 
-          <HostsTable />
+          <hr/>
 
-          { configContent ? <ConfigEditor initialConfig={configContent} onSave={()=>{}} /> : null }
+          <HostsTable hosts={parsedConf.dhcpHosts} leases={leases} onChange={handleNewHosts} />
+
+          <hr/>
+
+          { parsedConf ? <ConfigEditor initialConfig={parsedConf} onSave={()=>{}} /> : null }
 
           {/* Configuration
               <button onClick={handleSaveConfig} className="btn btn-primary">Save Configuration</button>
@@ -105,7 +127,8 @@ const App = () => {
           */}
 
         </div>
-      </div>
+        ) : null }
+      </div>      
 
       <ServiceStatus />
     </div>

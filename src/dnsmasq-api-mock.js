@@ -1,5 +1,4 @@
 import DnsmasqLeasesParser from './leases-parser.js';
-import DnsmasqConfigParser from './config-parser-single.js'
 
 class DnsmasqApi {
   // System service operations
@@ -45,9 +44,7 @@ dhcp-host=11:22:33:44:55:66,192.168.10.51,server,24h
 
 # Limit leases for eth0
 dhcp-lease-max=150`
-    let result = DnsmasqConfigParser.parse(txt)
-    console.log('readConfig', result)
-    return result
+    return txt
   }
 
   static async saveConfig(content) {
