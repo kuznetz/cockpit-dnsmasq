@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Panel, PanelMain, PanelMainBody, PanelHeader,
-  Card, CardTitle, CardBody, Title, Button
+  Card, CardTitle, CardBody, Title, Button,
+  Grid, GridItem, Form, FormGroup, TextInput,
 } from '@patternfly/react-core';
 
 const DhcpConfigEditor = ({ initialConfig, onSave }) => {
@@ -165,61 +165,79 @@ const DhcpConfigEditor = ({ initialConfig, onSave }) => {
           </Card>
 
           {/* DHCP Range */}
-          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+          <Card isCompact isFlat style={{ marginBottom: "10px" }}>
             <CardTitle>DHCP Range</CardTitle>
             <CardBody>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Start IP:</label>
-                  <input
-                    type="text"
-                    value={config.dhcpRange.start}
-                    onChange={(e) => handleDhcpRangeChange('start', e.target.value)}
-                    placeholder="192.168.10.100"
-                  />
-                  {errors.dhcpRangeStart && (
-                    <span className="error">{errors.dhcpRangeStart}</span>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>End IP:</label>
-                  <input
-                    type="text"
-                    value={config.dhcpRange.end}
-                    onChange={(e) => handleDhcpRangeChange('end', e.target.value)}
-                    placeholder="192.168.10.200"
-                  />
-                  {errors.dhcpRangeEnd && (
-                    <span className="error">{errors.dhcpRangeEnd}</span>
-                  )}
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Netmask:</label>
-                  <input
-                    type="text"
-                    value={config.dhcpRange.netmask}
-                    onChange={(e) => handleDhcpRangeChange('netmask', e.target.value)}
-                    placeholder="255.255.255.0"
-                  />
-                  {errors.dhcpRangeNetmask && (
-                    <span className="error">{errors.dhcpRangeNetmask}</span>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>Lease Time:</label>
-                  <input
-                    type="text"
-                    value={config.dhcpRange.leaseTime}
-                    onChange={(e) => handleDhcpRangeChange('leaseTime', e.target.value)}
-                    placeholder="24h"
-                  />
-                  {errors.dhcpRangeLeaseTime && (
-                    <span className="error">{errors.dhcpRangeLeaseTime}</span>
-                  )}
-                </div>
-              </div>
+              <Grid hasGutter>
+                <GridItem span={6}>
+                  <FormGroup
+                    label="Start IP"
+                    fieldId="dhcp-start-ip"
+                    validated={errors.dhcpRangeStart ? 'error' : 'default'}
+                    helperTextInvalid={errors.dhcpRangeStart}
+                  >
+                    <TextInput
+                      id="dhcp-start-ip"
+                      type="text"
+                      value={config.dhcpRange.start}
+                      onChange={(_event, value) => handleDhcpRangeChange('start', value)}
+                      placeholder="192.168.10.100"
+                      validated={errors.dhcpRangeStart ? 'error' : 'default'}
+                    />
+                  </FormGroup>
+                </GridItem>
+                <GridItem span={6}>
+                  <FormGroup
+                    label="End IP"
+                    fieldId="dhcp-end-ip"
+                    validated={errors.dhcpRangeEnd ? 'error' : 'default'}
+                    helperTextInvalid={errors.dhcpRangeEnd}
+                  >
+                    <TextInput
+                      id="dhcp-end-ip"
+                      type="text"
+                      value={config.dhcpRange.end}
+                      onChange={(_event, value) => handleDhcpRangeChange('end', value)}
+                      placeholder="192.168.10.200"
+                      validated={errors.dhcpRangeEnd ? 'error' : 'default'}
+                    />
+                  </FormGroup>
+                </GridItem>
+                <GridItem span={6}>
+                  <FormGroup
+                    label="Netmask"
+                    fieldId="dhcp-netmask"
+                    validated={errors.dhcpRangeNetmask ? 'error' : 'default'}
+                    helperTextInvalid={errors.dhcpRangeNetmask}
+                  >
+                    <TextInput
+                      id="dhcp-netmask"
+                      type="text"
+                      value={config.dhcpRange.netmask}
+                      onChange={(_event, value) => handleDhcpRangeChange('netmask', value)}
+                      placeholder="255.255.255.0"
+                      validated={errors.dhcpRangeNetmask ? 'error' : 'default'}
+                    />
+                  </FormGroup>
+                </GridItem>
+                <GridItem span={6}>
+                  <FormGroup
+                    label="Lease Time"
+                    fieldId="dhcp-lease-time"
+                    validated={errors.dhcpRangeLeaseTime ? 'error' : 'default'}
+                    helperTextInvalid={errors.dhcpRangeLeaseTime}
+                  >
+                    <TextInput
+                      id="dhcp-lease-time"
+                      type="text"
+                      value={config.dhcpRange.leaseTime}
+                      onChange={(_event, value) => handleDhcpRangeChange('leaseTime', value)}
+                      placeholder="24h"
+                      validated={errors.dhcpRangeLeaseTime ? 'error' : 'default'}
+                    />
+                  </FormGroup>
+                </GridItem>
+              </Grid>
             </CardBody>
           </Card>
 
@@ -292,47 +310,61 @@ const DhcpConfigEditor = ({ initialConfig, onSave }) => {
           </Card>
 
           {/* Other Settings */}
-          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+          <Card isCompact style={{ marginBottom: "10px" }}>
             <CardTitle>Other Settings</CardTitle>
             <CardBody>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Domain Name:</label>
-                  <input
+                <FormGroup
+                  label="Domain Name"
+                  fieldId="domain-name"
+                  style={{ marginBottom: "10px" }}
+                >
+                  <TextInput
                     type="text"
+                    id="domain-name"
                     value={config.domainName}
-                    onChange={(e) => setConfig(prev => ({ ...prev, domainName: e.target.value }))}
+                    onChange={(_event, value) => setConfig(prev => ({ ...prev, domainName: value }))}
                     placeholder="office.local"
                   />
-                </div>
-                <div className="form-group">
-                  <label>Broadcast Address:</label>
-                  <input
+                </FormGroup>
+                
+                <FormGroup
+                  label="Broadcast Address"
+                  fieldId="broadcast-address"
+                  validated={errors.broadcast ? 'error' : 'default'}
+                  helperTextInvalid={errors.broadcast}
+                  style={{ marginBottom: "10px" }}
+                >
+                  <TextInput
                     type="text"
+                    id="broadcast-address"
                     value={config.broadcast}
-                    onChange={(e) => setConfig(prev => ({ ...prev, broadcast: e.target.value }))}
+                    onChange={(_event, value) => setConfig(prev => ({ ...prev, broadcast: value }))}
                     placeholder="192.168.10.255"
+                    validated={errors.broadcast ? 'error' : 'default'}
                   />
-                  {errors.broadcast && (
-                    <span className="error">{errors.broadcast}</span>
-                  )}
-                </div>
-              </div>
-              <div className="form-group">
-                <label>DHCP Lease Max:</label>
-                <input
-                  type="number"
-                  value={config.dhcpLeaseMax}
-                  onChange={(e) => setConfig(prev => ({ ...prev, dhcpLeaseMax: parseInt(e.target.value) || 0 }))}
-                  min="1"
-                  max="10000"
-                />
-                {errors.dhcpLeaseMax && (
-                  <span className="error">{errors.dhcpLeaseMax}</span>
-                )}
-              </div>
+                </FormGroup>
+                
+                <FormGroup
+                  label="DHCP Lease Max"
+                  fieldId="dhcp-lease-max"
+                  validated={errors.dhcpLeaseMax ? 'error' : 'default'}
+                  helperTextInvalid={errors.dhcpLeaseMax}
+                  style={{ marginBottom: "10px" }}
+                >
+                  <TextInput
+                    type="number"
+                    id="dhcp-lease-max"
+                    value={config.dhcpLeaseMax}
+                    onChange={(_event, value) => setConfig(prev => ({ ...prev, dhcpLeaseMax: parseInt(value) || 0 }))}
+                    min="1"
+                    max="10000"
+                    validated={errors.dhcpLeaseMax ? 'error' : 'default'}
+                  />
+                </FormGroup>
+
             </CardBody>
           </Card>
+
         </div>
 
         {/* Action Buttons */}
