@@ -1,0 +1,23 @@
+{
+  "name": "dnsmasq",
+  "version": "1.0.0",
+  "title": "Dnsmasq",
+  "description": "Control and monitor dnsmasq DNS/DHCP server",
+  "author": "Georgiy Kuznetsov",
+  "license": "MIT",
+  "config": {
+    "privileged": true
+  },
+  "requires": {
+    "cockpit": "239"
+  },  
+  "menu": {
+    "dnsmasq": {
+      "name": "Dnsmasq",
+      "weight": 100,
+      "component": "dnsmasq"
+    }
+  },
+  "tools": {
+  }
+}
