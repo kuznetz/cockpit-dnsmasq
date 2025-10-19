@@ -21,7 +21,7 @@ const DhcpTable = ({ data }) => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ fontFamily: 'Arial, sans-serif' }}>
       <table
         style={{
           width: '100%',

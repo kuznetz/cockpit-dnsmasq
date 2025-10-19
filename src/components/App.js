@@ -5,6 +5,10 @@ import ConfigEditor from './ConfigEditor.js';
 import HostsTable from './HostsTable.js';
 import DnsmasqConfigParser from '../config-parser-single.js'
 import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Panel, PanelMain, PanelMainBody, PanelHeader,
+  Card, CardTitle, CardBody, Title, Button
+} from '@patternfly/react-core';
 
 const App = () => {
   const [loaded, setLoaded] = useState(false);
@@ -80,44 +84,52 @@ const App = () => {
   };  
 
   return (
-    <div className="container-fluid">
-      {notification && (
-        <div 
-          className="alert alert-success alert-dismissible"
-          style={{ position: "fixed", top: "20px", right: "20px", zIndex: "1000" }}
-        >
-          <button 
-            type="button" 
-            className="close" 
-            onClick={() => setNotification(null)}
+    <Panel>
+      <PanelHeader>
+          <Title headingLevel="h1">Dnsmasq</Title>
+      </PanelHeader>
+      <PanelMain><PanelMainBody>
+
+        {notification && (
+          <div 
+            className="alert alert-success alert-dismissible"
+            style={{ position: "fixed", top: "20px", right: "20px", zIndex: "1000" }}
           >
-            &times;
-          </button>
-          {notification}
-        </div>
-      )}
-      
-      <div>
-        <h2>Dnsmasq</h2>
+            <button 
+              type="button" 
+              className="close" 
+              onClick={() => setNotification(null)}
+            >
+              &times;
+            </button>
+            {notification}
+          </div>
+        )}
+        
         { loaded? (
         <div>         
           {/* DNS Leases */}
-          <div className="panel panel-default">
+          <div className="panel panel-default" style={{ marginBottom: "20px" }}>
             <div className="panel-heading">
-              <h3 className="panel-title">DNS Leases</h3>
+              <Title headingLevel="h3">DHCP Leases</Title>
             </div>
             <div className="panel-body">
               { /*typeof leasesContent*/ null }
               { leases ? <DhcpTable data={leases} /> : null }
-              <button onClick={loadLeases} className="btn btn-default">Refresh Leases</button>
+              <div style={{ textAlign: "center", padding:"10px" }}>
+                <Button onClick={loadLeases} variant="secondary" size="md">Refresh Leases</Button>
+              </div>
             </div>
           </div>
 
-          <hr/>
-
-          <HostsTable hosts={parsedConf.dhcpHosts} leases={leases} onChange={handleNewHosts} />
-
-          <hr/>
+          <div className="panel panel-default" style={{ marginBottom: "20px" }}>
+            <div className="panel-heading">
+              <Title headingLevel="h3">DHCP Hosts</Title>
+            </div>
+            <div className="panel-body">
+              <HostsTable hosts={parsedConf.dhcpHosts} leases={leases} onChange={handleNewHosts} />
+            </div>
+          </div>
 
           { parsedConf ? <ConfigEditor initialConfig={parsedConf} onSave={()=>{}} /> : null }
 
@@ -128,10 +140,11 @@ const App = () => {
 
         </div>
         ) : null }
-      </div>      
 
-      <ServiceStatus />
-    </div>
+        <ServiceStatus />
+
+      </PanelMainBody></PanelMain>
+    </Panel>
   );
 };
 

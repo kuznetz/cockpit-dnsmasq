@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Panel, PanelMain, PanelMainBody, PanelHeader,
+  Card, CardTitle, CardBody, Title, Button
+} from '@patternfly/react-core';
 
 const DhcpConfigEditor = ({ initialConfig, onSave }) => {
   const [config, setConfig] = useState(initialConfig);
@@ -115,210 +119,229 @@ const DhcpConfigEditor = ({ initialConfig, onSave }) => {
   };
 
   return (
-    <div className="dhcp-config-editor">
-      <h2>DHCP Configuration Editor</h2>
+    <div className="panel panel-default dhcp-config-editor" style={{ marginBottom: "20px" }}>
+      <div className="panel-heading">
+        <Title headingLevel="h3">DHCP Configuration Editor</Title>
+      </div>
       
-      {/* Interfaces */}
-      <div className="form-section">
-        <h3>Interfaces</h3>
-        {config.interfaces.map((interfaceName, index) => (
-          <div key={index} className="array-item">
-            <input
-              type="text"
-              value={interfaceName}
-              onChange={(e) => handleArrayChange('interfaces', index, e.target.value)}
-              placeholder="Interface name (e.g., eth0)"
-            />
-            {config.interfaces.length > 1 && (
+      <div className="panel-body">
+
+        <div className="config-editor-grid">
+
+          {/* Interfaces */}
+        <Card isCompact={true} style={{ marginBottom: "10px" }}>
+            <CardTitle>Interfaces</CardTitle>
+            <CardBody >
+                {config.interfaces.map((interfaceName, index) => (
+                  <div key={index} className="array-item">
+                    <input
+                      type="text"
+                      value={interfaceName}
+                      onChange={(e) => handleArrayChange('interfaces', index, e.target.value)}
+                      placeholder="Interface name (e.g., eth0)"
+                    />
+                    {config.interfaces.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveArrayItem('interfaces', index)}
+                        className="remove-btn"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    {errors.interfaces && index === 0 && (
+                      <span className="error">{errors.interfaces}</span>
+                    )}
+                  </div>
+                ))}
+                <button 
+                  type="button" 
+                  onClick={() => handleAddArrayItem('interfaces', '')}
+                  className="add-btn"
+                >
+                  Add Interface
+                </button>
+            </CardBody>
+          </Card>
+
+          {/* DHCP Range */}
+          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+            <CardTitle>DHCP Range</CardTitle>
+            <CardBody>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Start IP:</label>
+                  <input
+                    type="text"
+                    value={config.dhcpRange.start}
+                    onChange={(e) => handleDhcpRangeChange('start', e.target.value)}
+                    placeholder="192.168.10.100"
+                  />
+                  {errors.dhcpRangeStart && (
+                    <span className="error">{errors.dhcpRangeStart}</span>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>End IP:</label>
+                  <input
+                    type="text"
+                    value={config.dhcpRange.end}
+                    onChange={(e) => handleDhcpRangeChange('end', e.target.value)}
+                    placeholder="192.168.10.200"
+                  />
+                  {errors.dhcpRangeEnd && (
+                    <span className="error">{errors.dhcpRangeEnd}</span>
+                  )}
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Netmask:</label>
+                  <input
+                    type="text"
+                    value={config.dhcpRange.netmask}
+                    onChange={(e) => handleDhcpRangeChange('netmask', e.target.value)}
+                    placeholder="255.255.255.0"
+                  />
+                  {errors.dhcpRangeNetmask && (
+                    <span className="error">{errors.dhcpRangeNetmask}</span>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>Lease Time:</label>
+                  <input
+                    type="text"
+                    value={config.dhcpRange.leaseTime}
+                    onChange={(e) => handleDhcpRangeChange('leaseTime', e.target.value)}
+                    placeholder="24h"
+                  />
+                  {errors.dhcpRangeLeaseTime && (
+                    <span className="error">{errors.dhcpRangeLeaseTime}</span>
+                  )}
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Routers */}
+          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+            <CardTitle>Routers</CardTitle>
+            <CardBody>
+              {config.routers.map((router, index) => (
+                <div key={index} className="array-item">
+                  <input
+                    type="text"
+                    value={router}
+                    onChange={(e) => handleArrayChange('routers', index, e.target.value)}
+                    placeholder="Router IP address"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveArrayItem('routers', index)}
+                    className="remove-btn"
+                  >
+                    Remove
+                  </button>
+                  {errors[`router-${index}`] && (
+                    <span className="error">{errors[`router-${index}`]}</span>
+                  )}
+                </div>
+              ))}
               <button 
                 type="button" 
-                onClick={() => handleRemoveArrayItem('interfaces', index)}
-                className="remove-btn"
+                onClick={() => handleAddArrayItem('routers', '')}
+                className="add-btn"
               >
-                Remove
+                Add Router
               </button>
-            )}
-            {errors.interfaces && index === 0 && (
-              <span className="error">{errors.interfaces}</span>
-            )}
-          </div>
-        ))}
-        <button 
-          type="button" 
-          onClick={() => handleAddArrayItem('interfaces', '')}
-          className="add-btn"
-        >
-          Add Interface
-        </button>
-      </div>
+            </CardBody>
+          </Card>
 
-      {/* DHCP Range */}
-      <div className="form-section">
-        <h3>DHCP Range</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Start IP:</label>
-            <input
-              type="text"
-              value={config.dhcpRange.start}
-              onChange={(e) => handleDhcpRangeChange('start', e.target.value)}
-              placeholder="192.168.10.100"
-            />
-            {errors.dhcpRangeStart && (
-              <span className="error">{errors.dhcpRangeStart}</span>
-            )}
-          </div>
-          <div className="form-group">
-            <label>End IP:</label>
-            <input
-              type="text"
-              value={config.dhcpRange.end}
-              onChange={(e) => handleDhcpRangeChange('end', e.target.value)}
-              placeholder="192.168.10.200"
-            />
-            {errors.dhcpRangeEnd && (
-              <span className="error">{errors.dhcpRangeEnd}</span>
-            )}
-          </div>
+          {/* DNS Servers */}
+          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+            <CardTitle>DNS Servers</CardTitle>
+            <CardBody>
+              {config.dnsServers.map((dns, index) => (
+                <div key={index} className="array-item">
+                  <input
+                    type="text"
+                    value={dns}
+                    onChange={(e) => handleArrayChange('dnsServers', index, e.target.value)}
+                    placeholder="DNS server IP address"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveArrayItem('dnsServers', index)}
+                    className="remove-btn"
+                  >
+                    Remove
+                  </button>
+                  {errors[`dns-${index}`] && (
+                    <span className="error">{errors[`dns-${index}`]}</span>
+                  )}
+                </div>
+              ))}
+              <button 
+                type="button" 
+                onClick={() => handleAddArrayItem('dnsServers', '')}
+                className="add-btn"
+              >
+                Add DNS Server
+              </button>
+            </CardBody>
+          </Card>
+
+          {/* Other Settings */}
+          <Card isCompact={true} style={{ marginBottom: "10px" }}>
+            <CardTitle>Other Settings</CardTitle>
+            <CardBody>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Domain Name:</label>
+                  <input
+                    type="text"
+                    value={config.domainName}
+                    onChange={(e) => setConfig(prev => ({ ...prev, domainName: e.target.value }))}
+                    placeholder="office.local"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Broadcast Address:</label>
+                  <input
+                    type="text"
+                    value={config.broadcast}
+                    onChange={(e) => setConfig(prev => ({ ...prev, broadcast: e.target.value }))}
+                    placeholder="192.168.10.255"
+                  />
+                  {errors.broadcast && (
+                    <span className="error">{errors.broadcast}</span>
+                  )}
+                </div>
+              </div>
+              <div className="form-group">
+                <label>DHCP Lease Max:</label>
+                <input
+                  type="number"
+                  value={config.dhcpLeaseMax}
+                  onChange={(e) => setConfig(prev => ({ ...prev, dhcpLeaseMax: parseInt(e.target.value) || 0 }))}
+                  min="1"
+                  max="10000"
+                />
+                {errors.dhcpLeaseMax && (
+                  <span className="error">{errors.dhcpLeaseMax}</span>
+                )}
+              </div>
+            </CardBody>
+          </Card>
         </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Netmask:</label>
-            <input
-              type="text"
-              value={config.dhcpRange.netmask}
-              onChange={(e) => handleDhcpRangeChange('netmask', e.target.value)}
-              placeholder="255.255.255.0"
-            />
-            {errors.dhcpRangeNetmask && (
-              <span className="error">{errors.dhcpRangeNetmask}</span>
-            )}
-          </div>
-          <div className="form-group">
-            <label>Lease Time:</label>
-            <input
-              type="text"
-              value={config.dhcpRange.leaseTime}
-              onChange={(e) => handleDhcpRangeChange('leaseTime', e.target.value)}
-              placeholder="24h"
-            />
-            {errors.dhcpRangeLeaseTime && (
-              <span className="error">{errors.dhcpRangeLeaseTime}</span>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Routers */}
-      <div className="form-section">
-        <h3>Routers</h3>
-        {config.routers.map((router, index) => (
-          <div key={index} className="array-item">
-            <input
-              type="text"
-              value={router}
-              onChange={(e) => handleArrayChange('routers', index, e.target.value)}
-              placeholder="Router IP address"
-            />
-            <button 
-              type="button" 
-              onClick={() => handleRemoveArrayItem('routers', index)}
-              className="remove-btn"
-            >
-              Remove
-            </button>
-            {errors[`router-${index}`] && (
-              <span className="error">{errors[`router-${index}`]}</span>
-            )}
-          </div>
-        ))}
-        <button 
-          type="button" 
-          onClick={() => handleAddArrayItem('routers', '')}
-          className="add-btn"
-        >
-          Add Router
-        </button>
-      </div>
+        {/* Action Buttons */}
+        <div style={{ textAlign: "center", padding:"10px" }}>
+          <Button onClick={handleSave} variant="primary" size="md">
+            Save Configuration
+          </Button>
+        </div>        
 
-      {/* DNS Servers */}
-      <div className="form-section">
-        <h3>DNS Servers</h3>
-        {config.dnsServers.map((dns, index) => (
-          <div key={index} className="array-item">
-            <input
-              type="text"
-              value={dns}
-              onChange={(e) => handleArrayChange('dnsServers', index, e.target.value)}
-              placeholder="DNS server IP address"
-            />
-            <button 
-              type="button" 
-              onClick={() => handleRemoveArrayItem('dnsServers', index)}
-              className="remove-btn"
-            >
-              Remove
-            </button>
-            {errors[`dns-${index}`] && (
-              <span className="error">{errors[`dns-${index}`]}</span>
-            )}
-          </div>
-        ))}
-        <button 
-          type="button" 
-          onClick={() => handleAddArrayItem('dnsServers', '')}
-          className="add-btn"
-        >
-          Add DNS Server
-        </button>
-      </div>
-
-      {/* Other Settings */}
-      <div className="form-section">
-        <h3>Other Settings</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Domain Name:</label>
-            <input
-              type="text"
-              value={config.domainName}
-              onChange={(e) => setConfig(prev => ({ ...prev, domainName: e.target.value }))}
-              placeholder="office.local"
-            />
-          </div>
-          <div className="form-group">
-            <label>Broadcast Address:</label>
-            <input
-              type="text"
-              value={config.broadcast}
-              onChange={(e) => setConfig(prev => ({ ...prev, broadcast: e.target.value }))}
-              placeholder="192.168.10.255"
-            />
-            {errors.broadcast && (
-              <span className="error">{errors.broadcast}</span>
-            )}
-          </div>
-        </div>
-        <div className="form-group">
-          <label>DHCP Lease Max:</label>
-          <input
-            type="number"
-            value={config.dhcpLeaseMax}
-            onChange={(e) => setConfig(prev => ({ ...prev, dhcpLeaseMax: parseInt(e.target.value) || 0 }))}
-            min="1"
-            max="10000"
-          />
-          {errors.dhcpLeaseMax && (
-            <span className="error">{errors.dhcpLeaseMax}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button type="button" onClick={handleSave} className="save-btn">
-          Save Configuration
-        </button>
       </div>
     </div>
   );

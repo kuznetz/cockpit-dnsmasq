@@ -1,0 +1,11 @@
+.config-editor-grid {
+    border: 1px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.config-editor-grid  > div {
+  min-width: 250px;
+}
