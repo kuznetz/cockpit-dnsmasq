@@ -1,4 +1,11 @@
 import React from 'react';
+import {
+  Button, TextInput, Toolbar,
+  ToolbarContent, ToolbarItem, ActionList, ActionListItem,
+  Bullseye, EmptyState, EmptyStateBody, Title
+} from '@patternfly/react-core';
+import { Table, Thead, Tbody, TableVariant, Tr, Td, Th } from '@patternfly/react-table';
+import { EditIcon, TrashIcon, PlusIcon, SaveIcon, TimesIcon } from '@patternfly/react-icons';
 
 const DhcpTable = ({ data }) => {
   // Function to format timestamp to readable date
@@ -20,52 +27,54 @@ const DhcpTable = ({ data }) => {
     );
   };
 
+
+  const removeRow = (index) => {
+    alert('removeRow '+index)
+  };  
+
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif' }}>
-      <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          marginTop: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}
+    <div>
+      <Table
+        variant={TableVariant.compact}
+        aria-label="Dhcp leases table"
       >
-        <thead>
-          <tr style={{ backgroundColor: '#f5f5f5' }}>
-            <th>Expiry Date</th>
-            <th>Status</th>
-            <th>MAC Address</th>
-            <th>IP Address</th>
-            <th>Hostname</th>
-            {/*<th>Client ID</th>*/}
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+        <Thead>
+          <Tr>
+            <Th>Expiry Date</Th>
+            <Th>Status</Th>
+            <Th>MAC Address</Th>
+            <Th>IP Address</Th>
+            <Th>Hostname</Th>
+            {/*<Th>Client ID</Th>*/}
+            <Th style={{ width:'150px' }}></Th>
+          </Tr>
+        </Thead>
+        <Tbody>
           {data.map((item, index) => (
-            <tr
-              key={index}
-              style={{
-                backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9',
-                borderBottom: '1px solid #ddd'
-              }}
-            >
-              <td >{formatTimestamp(item.timestamp)}</td>
-              <td >{renderStatus(item.isActive)}</td>
-              <td >{item.mac}</td>
-              <td >{item.ip}</td>
-              <td >{item.hostname}</td>
-              {/*<td style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+            <Tr key={index}>
+              <Td>{formatTimestamp(item.timestamp)}</Td>
+              <Td>{renderStatus(item.isActive)}</Td>
+              <Td>{item.mac}</Td>
+              <Td>{item.ip}</Td>
+              <Td>{item.hostname}</Td>
+              {/*<Tdstyle={{ fontFamily: 'monospace', fontSize: '12px' }}>
                 {item.clientId}
-              </td>*/}
-              <td >
-                <button>remove</button>
-                <button>add permanent</button>
-              </td>
-            </tr>
+              </Td>*/}
+              <Td style={{ textAlign:'right' }}>
+                <Button
+                  variant="link" isDanger
+                  size="sm"
+                  onClick={() => removeRow(index)}
+                  icon={<TrashIcon />}
+                  aria-label="Remove"
+                >
+                  Remove
+                </Button>                
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
+        </Tbody>
+      </Table>
     </div>
   );
 };

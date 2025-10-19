@@ -167,17 +167,7 @@ const HostsTable = ({ leases, hosts, onChange }) => {
                       aria-label={`Lease time for row ${index + 1}`}
                     />
                   </Td>
-                  <Td>
-                    <ActionList>
-                      <ActionListItem>
-                        <Button
-                          variant="primary"
-                          onClick={confirmEditing}
-                          icon={<SaveIcon />}
-                          aria-label="Save changes"
-                        >
-                          Save
-                        </Button>
+                  <Td style={{ textAlign:'right', width:'250px' }}>
                         <Button
                           variant="link"
                           onClick={() => cancelEditing(index)}
@@ -186,8 +176,14 @@ const HostsTable = ({ leases, hosts, onChange }) => {
                         >
                           Cancel
                         </Button>
-                      </ActionListItem>
-                    </ActionList>
+                        <Button
+                          variant="primary"
+                          onClick={confirmEditing}
+                          icon={<SaveIcon />}
+                          aria-label="Save changes"
+                        >
+                          Save
+                        </Button>
                   </Td>
                 </Tr>
               ) : (
@@ -204,29 +200,23 @@ const HostsTable = ({ leases, hosts, onChange }) => {
                   <Td>
                     {item.leaseTime}
                   </Td>
-                  <Td>
-                    <ActionList>
-                      <ActionListItem>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => startEditing(index)}
-                          icon={<EditIcon />}
-                          aria-label="Edit row"
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => removeRow(index)}
-                          icon={<TrashIcon />}
-                          aria-label="Delete row"
-                        >
-                          Delete
-                        </Button>
-                      </ActionListItem>
-                    </ActionList>
+                  <Td style={{ textAlign:'right' }}>
+                    <Button
+                      variant="link" size="sm"
+                      onClick={() => startEditing(index)}
+                      icon={<EditIcon />}
+                      aria-label="Edit row"
+                    >
+                      Edit
+                    </Button> 
+                    <Button
+                      variant="link" isDanger size="sm"
+                      onClick={() => removeRow(index)}
+                      icon={<TrashIcon />}
+                      aria-label="Remove row"
+                    >
+                      Remove
+                    </Button> 
                   </Td>
                 </Tr>
               )              

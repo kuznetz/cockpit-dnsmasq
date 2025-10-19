@@ -1,5 +1,11 @@
 import DnsmasqApi from 'dnsmasq-api';
 import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Panel, PanelMain, PanelMainBody, PanelHeader,
+  Card, CardTitle, CardBody, Title, Button,
+  Flex, FlexItem
+} from '@patternfly/react-core';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 
 const ServiceStatus = () => {
   const [serviceStatus, setServiceStatus] = useState('Checking...');
@@ -69,32 +75,64 @@ const ServiceStatus = () => {
   }, [checkStatus]);
 
   const buttons = showButtons();
+  const isActive = serviceStatus === "active";
 
   return (
     <div className="panel panel-default">
       <div className="panel-heading">
-        <h3 className="panel-title">Service Status</h3>
+        <Title headingLevel="h3">Service Status</Title>
       </div>
       <div className="panel-body">
-        <div id="status-container">
-          <p>Status: <span className={serviceStatus === "active" ? "text-success" : "text-danger"}>
-            {serviceStatus}
-          </span></p>
-          {buttons.start && (
-            <button onClick={handleStart} className="btn btn-success">Start</button>
-          )}
-          {buttons.stop && (
-            <button onClick={handleStop} className="btn btn-danger">Stop</button>
-          )}
-          {buttons.restart && (
-            <button onClick={handleRestart} className="btn btn-warning">Restart</button>
-          )}
-          {buttons.reload && (
-            <button onClick={handleReload} className="btn btn-info">Reload</button>
-          )}
-        </div>
-      </div>
-    </div>
+        
+        <Card component="div">
+          <CardBody>
+            <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }} alignItems={{ default: 'alignItemsCenter' }}>
+              <FlexItem>
+                <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }}>
+                  <FlexItem>
+                    {isActive ? (
+                      <CheckCircleIcon className="pf-v6-u-color-100" />
+                    ) : (
+                      <ExclamationCircleIcon className="pf-v6-u-color-200" />
+                    )}
+                  </FlexItem>
+                  <FlexItem>
+                    Status: <span className={isActive ? "pf-v6-u-color-100" : "pf-v6-u-color-200"}>
+                      {serviceStatus}
+                    </span>
+                  </FlexItem>
+                </Flex>
+              </FlexItem>
+              <FlexItem>
+                <Flex gap={{ default: 'gapSm' }}>
+                  {buttons.start && (
+                    <Button variant="primary" onClick={handleStart}>
+                      Start
+                    </Button>
+                  )}
+                  {buttons.stop && (
+                    <Button variant="danger" onClick={handleStop}>
+                      Stop
+                    </Button>
+                  )}
+                  {buttons.restart && (
+                    <Button variant="warning" onClick={handleRestart}>
+                      Restart
+                    </Button>
+                  )}
+                  {buttons.reload && (
+                    <Button variant="secondary" onClick={handleReload}>
+                      Reload
+                    </Button>
+                  )}
+                </Flex>
+              </FlexItem>
+            </Flex>
+          </CardBody>
+        </Card>
+
+      </div>    
+    </div>        
   );
 };
 
