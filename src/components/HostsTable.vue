@@ -74,7 +74,7 @@
                   @click="cancelEditing(index)"
                   :aria-label="'Cancel editing'"
                 >
-                  <img :src="CancelSvg " class="icon" alt="Icon" />
+                  <VSvg :src="CancelSvg" fill="currentColor" class="icon" />
                   Cancel
                 </button>
                 <button
@@ -82,7 +82,7 @@
                   @click="confirmEditing"
                   :aria-label="'Save changes'"
                 >
-                  <img :src="ConfirmSvg" class="icon" alt="Icon" />
+                  <VSvg :src="ConfirmSvg" fill="currentColor" class="icon" />
                   Save
                 </button>
               </td>
@@ -99,7 +99,7 @@
                   @click="startEditing(index)"
                   :aria-label="'Edit row'"
                 >
-                  <img :src="EditSvg" class="icon" alt="Icon" />
+                  <VSvg :src="EditSvg" fill="currentColor" class="icon" />
                   Edit
                 </button>
                 <button
@@ -107,7 +107,7 @@
                   @click="removeRow(index)"
                   :aria-label="'Remove row'"
                 >
-                  <img :src="DeleteSvg" class="icon" alt="Icon" />
+                  <VSvg :src="DeleteSvg" fill="currentColor" class="icon" />
                   Remove
                 </button>
               </td>
@@ -135,8 +135,7 @@ import EditSvg from '@/svg/pen-to-square-solid-full.svg'
 import DeleteSvg from '@/svg/trash-solid-full.svg'
 import CancelSvg from '@/svg/xmark-solid-full.svg'
 import ConfirmSvg from '@/svg/check-solid-full.svg'
-
-
+import VSvg from '../ui/VSvg.vue';
 
 const props = defineProps({
   leases: {

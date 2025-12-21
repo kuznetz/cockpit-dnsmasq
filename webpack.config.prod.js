@@ -2,6 +2,7 @@ const path = require('path')
 const { VueLoaderPlugin } = require('vue-loader')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
   mode: 'production',
@@ -25,14 +26,14 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'vue-style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader'
         ]
       },
       {
         test: /\.scss$/,
         use: [
-          'vue-style-loader', // or 'style-loader' if not using Vue
+          MiniCssExtractPlugin.loader,
           'css-loader',
           {
             loader: 'sass-loader',
@@ -47,7 +48,7 @@ module.exports = {
       {
         test: /\.sass$/,
         use: [
-          'vue-style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader',
           {
             loader: 'sass-loader',
@@ -80,7 +81,8 @@ module.exports = {
           }
         }
       ]
-    })
+    }),
+    new MiniCssExtractPlugin()
   ],
   resolve: {
     extensions: ['.js', '.vue', '.json'],

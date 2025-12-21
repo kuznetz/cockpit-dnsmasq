@@ -3,6 +3,22 @@
 @use "sass:color";
 @use '../variables' as *;
 
+pre {
+  overflow: auto;
+}
+
+//
+// Address odd `em`-unit font size rendering in all browsers.
+//
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
 code {
   padding: .2rem .5rem;
   margin: 0 .2rem;

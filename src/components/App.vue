@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main-container">
 
     <div class="flex-row" style="margin-bottom: 10px;">
       <div class="flex-grow">
@@ -68,7 +68,6 @@
         />          
 
       </div>
-
   </div>
 </template>
 
@@ -155,5 +154,4 @@ onMounted(async () => {
 </script>
 
 <style lang="scss">
-  @forward "@/styles/index.scss";
 </style>

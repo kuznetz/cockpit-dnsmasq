@@ -1,6 +1,28 @@
 // Variables
 //––––––––––––––––––––––––––––––––––––––––––––––––––
 
+html {
+  --main-background: #f2f2f2;
+  --main-border-color: #f2f2f2;
+
+  --color: #151515;
+  --background: #fff;
+  --border-color: #c7c7c7;
+  --primary-color: #0066cc;
+  --primary-color-active: #004d99;
+}
+
+.theme-dark {
+  --main-background: #151515;
+  --main-border-color: #151515;
+
+  --color: #e6e6e6;
+  --background: #292929;
+  --border-color: #a3a3a3;
+  --primary-color: #b9dafc;
+  --primary-color-active: #e0f0ff;
+}
+
 // Breakpoints
 $bp-larger-than-mobile    : "min-width: 400px" !default;
 $bp-larger-than-phablet   : "min-width: 550px" !default;
@@ -8,7 +30,6 @@ $bp-larger-than-tablet    : "min-width: 750px" !default;
 $bp-larger-than-desktop   : "min-width: 1000px" !default;
 $bp-larger-than-desktophd : "min-width: 1200px" !default;
 
-// Colors
 $light-grey: #e1e1e1 !default;
 $dark-grey: #333 !default;
 $primary-color: #33c3f0 !default;

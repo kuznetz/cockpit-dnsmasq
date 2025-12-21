@@ -4,12 +4,12 @@
 @use '../variables' as *;
 
 .card {
-  border: 1px solid $border-color;
-  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
 
   .card-title {
     padding: 10px 10px;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--border-color);
     font-size: 1.6rem;
   }
 
@@ -19,6 +19,6 @@
 
   .card-footer {
     padding: 10px 10px ;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid var(--border-color);
   }  
 }

@@ -3,6 +3,16 @@
 @use '../variables' as *;
 
 table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+table {
   width: 100%;
 }
 
@@ -10,7 +20,7 @@ th,
 td {
   padding: 5px;
   text-align: left;
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid var(--border-color);
 }
 
 tr:last-child {

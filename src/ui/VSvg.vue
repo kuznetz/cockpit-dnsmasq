@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="svgContent"
+    class="icon"
     v-html="svgContent"
     v-bind="$attrs"
   />

@@ -6,7 +6,7 @@
       </div>
       <div>
         <button @click="del(idx)">
-          <img :src="DeleteSvg" class="icon" alt="Delete" />
+          <VSvg :src="DeleteSvg" fill="currentColor" class="icon" />
         </button>
       </div>
     </div>
