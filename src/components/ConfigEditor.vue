@@ -116,93 +116,26 @@
     <div class="flex-row" style="gap: 5px">
 
         <!-- Interfaces -->
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="width: 200px">
           <div class="card-title">Interfaces</div>
           <div class="card-body padding">
-            <div v-for="(interfaceName, index) in config.interfaces" :key="index" class="array-item">
-              <input
-                type="text"
-                :value="interfaceName"
-                @input="handleArrayChange('interfaces', index, $event.target.value)"
-                placeholder="Interface name (e.g., eth0)"
-              />
-              <button 
-                v-if="config.interfaces.length > 1"
-                type="button" 
-                @click="handleRemoveArrayItem('interfaces', index)"
-                class="remove-btn"
-              >
-                Remove
-              </button>
-              <span v-if="errors.interfaces && index === 0" class="error">{{ errors.interfaces }}</span>
-            </div>
-            <button 
-              type="button" 
-              @click="handleAddArrayItem('interfaces', '')"
-              class="add-btn"
-            >
-              Add Interface
-            </button>
+            <EditList @changed="config.interfaces = $event" :items="config.interfaces" placeholder="eth0" />
           </div>
         </div>
 
         <!-- Routers -->
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="width: 200px">
           <div class="card-title">Routers</div>
           <div class="card-body padding">
-            <div v-for="(router, index) in config.routers" :key="index" class="array-item">
-              <input
-                type="text"
-                :value="router"
-                @input="handleArrayChange('routers', index, $event.target.value)"
-                placeholder="Router IP address"
-              />
-              <button 
-                type="button" 
-                @click="handleRemoveArrayItem('routers', index)"
-                class="remove-btn"
-              >
-                Remove
-              </button>
-              <span v-if="errors[`router-${index}`]" class="error">{{ errors[`router-${index}`] }}</span>
-            </div>
-            <button 
-              type="button" 
-              @click="handleAddArrayItem('routers', '')"
-              class="add-btn"
-            >
-              Add Router
-            </button>
+            <EditList @changed="config.routers = $event" :items="config.routers" placeholder="192.168.0.1" />
           </div>
         </div>
 
         <!-- DNS Servers -->
-        <div class="card" style="margin-bottom: 10px">
+        <div class="card" style="width: 200px">
           <div class="card-title">DNS Servers</div>
           <div class="card-body padding">
-            <div v-for="(dns, index) in config.dnsServers" :key="index" class="array-item">
-              <input
-                type="text"
-                :value="dns"
-                @input="handleArrayChange('dnsServers', index, $event.target.value)"
-                placeholder="DNS server IP address"
-              />
-              <button 
-                type="button" 
-                @click="handleRemoveArrayItem('dnsServers', index)"
-                class="remove-btn"
-              >
-                Remove
-              </button>
-              <span v-if="errors[`dns-${index}`]" class="error">{{ errors[`dns-${index}`] }}</span>
-            </div>
-            <button 
-              type="button" 
-              @click="handleAddArrayItem('dnsServers', '')"
-              class="add-btn"
-            >
-              Add DNS Server
-            </button>
+            <EditList @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
           </div>
         </div>
 
@@ -220,6 +153,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import EditList from '../ui/EditList.vue'
 
 const props = defineProps({
   initialConfig: {

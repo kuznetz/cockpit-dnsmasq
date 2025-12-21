@@ -2,6 +2,13 @@
 //––––––––––––––––––––––––––––––––––––––––––––––––––
 @use '../variables' as *;
 
+.form-static {
+  height: calc($form-height - 14px);
+  line-height: calc($form-height - 14px);
+  padding: 7px 11px; // The 6px vertically centers text on FF, ignored by Webkit
+  width: 100%;
+}
+
 input[type='email'],
 input[type='number'],
 input[type='search'],
