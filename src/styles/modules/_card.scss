@@ -1,0 +1,24 @@
+// Code
+//––––––––––––––––––––––––––––––––––––––––––––––––––
+@use "sass:color";
+@use '../variables' as *;
+
+.card {
+  border: 1px solid $border-color;
+  border-radius: 10px;
+
+  .card-title {
+    padding: 10px 10px;
+    border-bottom: 1px solid $border-color;
+    font-size: 1.6rem;
+  }
+
+  .card-body.padding {
+    padding: 10px 10px;
+  }
+
+  .card-footer {
+    padding: 10px 10px ;
+    border-top: 1px solid $border-color;
+  }  
+}

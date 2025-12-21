@@ -1,0 +1,30 @@
+// Tables
+//––––––––––––––––––––––––––––––––––––––––––––––––––
+@use '../variables' as *;
+
+table {
+  width: 100%;
+}
+
+th,
+td {
+  padding: 5px;
+  text-align: left;
+  border-bottom: 1px solid $light-grey;
+}
+
+tr:last-child {
+  th, td {
+    border-bottom: 0;
+  }    
+}
+
+th:first-child,
+td:first-child {
+//  padding-left: 0;
+}
+
+th:last-child,
+td:last-child {
+//  padding-right: 0;
+}
