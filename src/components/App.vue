@@ -104,9 +104,7 @@ const loadConfig = async () => {
 
 const loadLeases = async () => {
   try {
-    const content = await DnsmasqApi.readLeases()
-    leases.value = content
-    console.log('loadLeases', content)
+    leases.value = await DnsmasqApi.readLeases()
   } catch (error) {
     leases.value = "Error reading leases: " + error
   }
@@ -117,15 +115,6 @@ const showNotification = (message) => {
   setTimeout(() => {
     notification.value = null
   }, 3000)
-}
-
-const handleReloadConfig = async () => {
-  try {
-    await DnsmasqApi.reloadService()
-    showNotification("Configuration reloaded successfully")
-  } catch (error) {
-    console.error("Failed to reload configuration:", error)
-  }
 }
 
 const handleNewHosts = async (newHosts) => {
@@ -145,6 +134,7 @@ const handleSaveConfig = async () => {
 onMounted(async () => {
   loaded.value = false
   try {
+    await DnsmasqApi.init()
     await Promise.all([loadConfig(), loadLeases()])
     loaded.value = true
   } catch (error) {
@@ -152,6 +142,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style lang="scss">
-</style>

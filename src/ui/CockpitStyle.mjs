@@ -3,16 +3,26 @@ export default class {
     window.addEventListener("cockpit-style", event => {
         if (event instanceof CustomEvent) {
             const style = event.detail.style;
-            this.setTheme(style)
+            this.setLocalTheme(style)
         }
     });
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         const style = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? "dark" : "light";
         //console.log(`Operating system theme preference changed to ${style}`);
     })
+    this.loadTheme()
+    //this.setLocalTheme('dark')
   }
 
-  setTheme(style) {
+  loadTheme() {
+    let curTheme = localStorage.getItem('shell:style') || 'auto';    
+    if (curTheme === 'auto') {
+      curTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+    }
+    this.setLocalTheme(curTheme)
+  }
+
+  setLocalTheme(style) {
     console.log(`Change Cockpit style to ${style}`);
     if (style === "dark") {
       document.body.classList.add("theme-dark");

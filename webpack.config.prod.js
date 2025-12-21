@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-module.exports = {
+module.exports = () => ({
   mode: 'production',
   entry: './src/main.js',
   output: {
@@ -71,7 +71,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-   new CopyWebpackPlugin({
+    new CopyWebpackPlugin({
       patterns: [
         {
           from: 'public',
@@ -84,6 +84,9 @@ module.exports = {
     }),
     new MiniCssExtractPlugin()
   ],
+  externals: {
+    cockpit: 'cockpit'
+  },  
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
@@ -91,4 +94,4 @@ module.exports = {
       'dnsmasq-api': path.join(__dirname, 'src/model/dnsmasq-api.js'),
     }    
   }
-}
+})

@@ -1,9 +1,13 @@
 import DnsmasqLeasesParser from './leases-parser.js';
 
 class DnsmasqApi {
-  // System service operations
+
+  static async init() {
+    console.log('DnsmasqApi init')
+  }
+
   static async checkStatus() {
-    return cockpit.spawn(["systemctl", "is-active", "dnsmasq"]);
+    return "OK"
   }
 
   static async startService() {

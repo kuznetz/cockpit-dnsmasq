@@ -1,8 +1,12 @@
-import cockpit from 'cockpit';
 import DnsmasqLeasesParser from './leases-parser.js';
+import cockpit from 'cockpit';
 
 class DnsmasqApi {
-  // System service operations
+
+  static async init() {
+    console.log('DnsmasqApi init',cockpit)
+  }
+  
   static async checkStatus() {
     return cockpit.spawn(["systemctl", "is-active", "dnsmasq"]);
   }
@@ -34,8 +38,9 @@ class DnsmasqApi {
 
   static async readLeases() {
     let txt = await cockpit.file("/var/lib/misc/dnsmasq.leases").read();
+    console.log('readLeases', txt)
     let result = DnsmasqLeasesParser.parse(txt)
-    console.log('result', result)
+    console.log('parseLeases', result)
     return result
   }
 

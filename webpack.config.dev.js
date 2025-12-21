@@ -1,15 +1,17 @@
 const path = require('path')
 const prod = require('./webpack.config.prod.js')
 
-let dev = prod
-dev.mode = 'development'
-dev.devServer = {
-  static: {
-    directory: path.join(__dirname, 'public'),
-  },
-  hot: true,
-  open: false,
-  port: 8080
+module.exports = () => {
+	let dev = prod()
+	dev.mode = 'development'
+	dev.devServer = {
+	  static: {
+		directory: path.join(__dirname, 'public'),
+	  },
+	  hot: true,
+	  open: false,
+	  port: 8080
+	}
+	dev.resolve.alias['dnsmasq-api'] = path.join(__dirname, 'src/model/dnsmasq-api-mock.js')
+	return dev
 }
-dev.resolve.alias['dnsmasq-api'] = path.join(__dirname, 'src/model/dnsmasq-api-mock.js')
-module.exports = dev
