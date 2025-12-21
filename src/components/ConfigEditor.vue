@@ -125,7 +125,7 @@
 
         <!-- Routers -->
         <div class="card" style="width: 200px">
-          <div class="card-title">Routers</div>
+          <div class="card-title">Gateways</div>
           <div class="card-body padding">
             <EditList @changed="config.routers = $event" :items="config.routers" placeholder="192.168.0.1" />
           </div>
@@ -261,20 +261,6 @@ const handleSave = () => {
   if (validateForm()) {
     props.onSave(config.value)
   }
-}
-
-const handleArrayChange = (arrayName, index, value) => {
-  const newArray = [...config.value[arrayName]]
-  newArray[index] = value
-  config.value[arrayName] = newArray
-}
-
-const handleAddArrayItem = (arrayName, defaultValue = '') => {
-  config.value[arrayName] = [...config.value[arrayName], defaultValue]
-}
-
-const handleRemoveArrayItem = (arrayName, index) => {
-  config.value[arrayName] = config.value[arrayName].filter((_, i) => i !== index)
 }
 
 const handleDhcpRangeChange = (field, value) => {
