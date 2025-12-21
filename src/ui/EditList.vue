@@ -5,7 +5,9 @@
         {{ option }}
       </div>
       <div>
-        <button @click="del(idx)">X</button>
+        <button @click="del(idx)">
+          <img :src="DeleteSvg" class="icon" alt="Delete" />
+        </button>
       </div>
     </div>
     <div class="flex-row">
@@ -13,61 +15,71 @@
         <input ref="addInp" @keydown.enter="add()" type="text" v-model="newValue" :placeholder="placeholder">
       </div>
       <div>
-        <button @click="add()">+</button>
+        <button @click="add()" class="primary">
+          <VSvg :src="AddSvg" fill="currentColor" class="icon" />
+        </button>
       </div>
     </div>    
   </div>
 </template>
 
 <script>
-export default {
-  name: 'EditList',  
-  props: {
-    items: {
-      type: Array
-    },
-    placeholder: {
-      type: String,
-      default: ''
-    }
-  },
-  
-  emits: ['changed'],
-  
-  data() {
-    return {
-      newItems: [],
-      newValue: ''
-    }
-  },
-  
-  watch: {
-    items(items) {
-      this.newItems = [...this.items]
-    }
-  },
+  import VSvg from './VSvg.vue';
+  import DeleteSvg from '@/svg/trash-solid-full.svg'
+  import AddSvg from '@/svg/plus-solid-full.svg'
 
-  mounted() {
-    if (this.items) {
-      this.newItems = [...this.items]
-    }
-  },
-  
-  methods: {
-    add() {
-      if (this.newValue) {
-        this.newItems.push(this.newValue)
-        this.newValue = ''
-        this.$emit('changed', this.newItems)
-        this.$refs.addInp.focus()
+  export default {
+    name: 'EditList',
+    components: { VSvg },
+    
+    props: {
+      items: {
+        type: Array
+      },
+      placeholder: {
+        type: String,
+        default: ''
       }
     },
-    del (idx) {
-      if (idx >= 0) {
-        this.newItems.splice(idx, 1)
-        this.$emit('changed', this.newItems)
+    
+    emits: ['changed'],
+    
+    data() {
+      return {
+        newItems: [],
+        newValue: '',
+        DeleteSvg,
+        AddSvg
+      }
+    },
+    
+    watch: {
+      items(items) {
+        this.newItems = [...this.items]
+      }
+    },
+
+    mounted() {
+      if (this.items) {
+        this.newItems = [...this.items]
+      }
+    },
+    
+    methods: {
+      add() {
+        if (this.newValue) {
+          this.newItems.push(this.newValue)
+          this.newValue = ''
+          this.$emit('changed', this.newItems)
+          this.$refs.addInp.focus()
+        }
+      },
+      del (idx) {
+        if (idx >= 0) {
+          this.newItems.splice(idx, 1)
+          this.$emit('changed', this.newItems)
+        }
       }
     }
   }
-}
 </script>

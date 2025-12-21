@@ -143,7 +143,7 @@
 
     <!-- Action Buttons -->
     <div style="text-align: center; padding: 10px">
-      <button @click="handleSave" class="btn btn-primary">
+      <button @click="handleSave" class="primary">
         Save Configuration
       </button>
     </div>

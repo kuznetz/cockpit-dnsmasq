@@ -1,56 +1,25 @@
 <template>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3>Service Status</h3>
+  <div class="flex-column">
+    <div>
+      <h3 style="margin-bottom: 3px">Service Status: 
+        <span :style="{color: (isActive ? 'green' : 'red')}">
+          {{ serviceStatus }}
+        </span>
+      </h3>
     </div>
-    <div class="panel-body">
-      <div class="pf-c-card" component="div">
-        <div class="pf-c-card__body">
-          <div class="pf-l-flex pf-m-column pf-m-align-items-center pf-m-gap-md">
-            <div class="pf-l-flex__item">
-              <div class="pf-l-flex pf-m-align-items-center pf-m-gap-sm">
-                <div class="pf-l-flex__item">
-                  <template v-if="isActive">
-                    <!--CheckCircleIcon class="pf-v6-u-color-100" /-->CheckCircleIcon
-                  </template>
-                  <template v-else>
-                    <!--ExclamationCircleIcon class="pf-v6-u-color-200" /-->ExclamationCircleIcon
-                  </template>
-                </div>
-                <div class="pf-l-flex__item">
-                  Status: <span :class="isActive ? 'pf-v6-u-color-100' : 'pf-v6-u-color-200'">
-                    {{ serviceStatus }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="pf-l-flex__item">
-              <div class="pf-l-flex pf-m-gap-sm">
-                <template v-if="buttons.start">
-                  <button class="pf-c-button pf-m-primary" @click="handleStart">
-                    Start
-                  </button>
-                </template>
-                <template v-if="buttons.stop">
-                  <button class="pf-c-button pf-m-danger" @click="handleStop">
-                    Stop
-                  </button>
-                </template>
-                <template v-if="buttons.restart">
-                  <button class="pf-c-button pf-m-warning" @click="handleRestart">
-                    Restart
-                  </button>
-                </template>
-                <template v-if="buttons.reload">
-                  <button class="pf-c-button pf-m-secondary" @click="handleReload">
-                    Reload
-                  </button>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div style="text-align: right;">
+      <button v-if="buttons.start" class="primary" @click="handleStart">
+        Start
+      </button>
+      <button v-if="buttons.stop" class="danger" @click="handleStop">
+        Stop
+      </button>
+      <button v-if="buttons.restart" class="warning" @click="handleRestart">
+        Restart
+      </button>
+      <button v-if="buttons.reload" class="secondary" @click="handleReload">
+        Reload
+      </button>
     </div>
   </div>
 </template>

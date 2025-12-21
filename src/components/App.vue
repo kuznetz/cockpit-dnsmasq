@@ -1,7 +1,15 @@
 <template>
   <div class="main">
 
-    <h1>Dnsmasq</h1>
+    <div class="flex-row" style="margin-bottom: 10px;">
+      <div class="flex-grow">
+        <h1>Dnsmasq</h1>
+      </div>
+      <div>
+        <!-- Service Status -->
+        <ServiceStatus />        
+      </div>
+    </div>    
 
       <!-- Notification -->
       <div 
@@ -59,8 +67,6 @@
           @save="handleSaveConfig"
         />          
 
-        <!-- Service Status -->
-        <ServiceStatus />
       </div>
 
   </div>
