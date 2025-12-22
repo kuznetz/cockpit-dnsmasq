@@ -87,12 +87,12 @@
                   <input
                     id="dhcp-lease-time"
                     type="text"
-                    :value="config.dhcpRange.leaseTime"
-                    @input="handleDhcpRangeChange('leaseTime', $event.target.value)"
+                    :value="config.leaseTime"
+                    @input="config.leaseTime = $event.target.value"
                     placeholder="24h"
-                    :class="{ 'error-input': errors.dhcpRangeLeaseTime }"
+                    :class="{ 'error-input': errors.dhcpLeaseTime }"
                   />
-                  <div v-if="errors.dhcpRangeLeaseTime" class="error-text">{{ errors.dhcpRangeLeaseTime }}</div>
+                  <div v-if="errors.dhcpLeaseTime" class="error-text">{{ errors.dhcpLeaseTime }}</div>
                 </div>
               </div>
 
@@ -133,6 +133,14 @@
           </div>
         </div>
 
+        <!-- NTP Servers -->
+        <div class="card" style="width: 200px">
+          <div class="card-title">NTP Servers</div>
+          <div class="card-body padding">
+            <EditList ref="editNtp" @changed="config.ntpServers = $event" :items="config.ntpServers" placeholder="0.0.0.0" />
+          </div>
+        </div>
+
     </div>
   </div>
 </template>
@@ -154,6 +162,7 @@ const props = defineProps({
       },
       router: '',
       dnsServers: [],
+      ntpServers: [],
       domainName: '',
       dhcpLeaseMax: 0
     })
@@ -168,6 +177,7 @@ const config = ref({ ...props.initialConfig })
 const errors = ref({})
 const editIfaces = ref(null)
 const editDns = ref(null)
+const editNtp = ref(null)
  
 // Watch for changes in initialConfig prop
 watch(() => props.initialConfig, (newConfig) => {
@@ -206,8 +216,8 @@ function validateForm() {
   if (config.value.router && !validateIpAddress(config.value.router)) {
     newErrors.router = 'Invalid gateway'
   }
-  if (config.value.dhcpRange.leaseTime && !validateLeaseTime(config.value.dhcpRange.leaseTime)) {
-    newErrors.dhcpRangeLeaseTime = 'Valid lease time required (e.g., 24h, 7d)'
+  if (config.value.leaseTime && !validateLeaseTime(config.value.leaseTime)) {
+    newErrors.dhcpLeaseTime = 'Valid lease time required (e.g., 24h, 7d)'
   }
 
   // Validate DNS servers
@@ -229,6 +239,7 @@ function validateForm() {
 async function getConfig() {
   editIfaces.value.save()
   editDns.value.save()
+  editNtp.value.save()
   await nextTick()
   return config.value
 }

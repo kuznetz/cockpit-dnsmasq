@@ -129,8 +129,8 @@ class DnsmasqConfigParser {
       code = optionMap[optionName] || code;
     }
 
-    switch (parts[0].trim()) {      
-      case '2': this.leaseTime = vals[0]; break;
+    switch (code) {      
+      case '2': this.config.leaseTime = vals[0]; break;
       case '3': this.config.router = vals[0]; break;
       case '6': this.config.dnsServers.push(...vals); break;
       case '15': this.config.domainName = vals[0]; break;

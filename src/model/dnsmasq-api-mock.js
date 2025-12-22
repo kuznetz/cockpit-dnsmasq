@@ -31,7 +31,7 @@ class DnsmasqApi {
   }  
 
   static async readConfig() {
-    let txt = `# Single Interface
+    /*let txt = `# Single Interface
 interface=eth0
 
 # Prevent dnsmasq from binding to any interface except specified ones
@@ -52,6 +52,20 @@ dhcp-host=11:22:33:44:55:66,192.168.10.51,server,24h
 dhcp-host=11:22:33:44:55:64,192.168.10.52,server2
 
 # Limit leases for eth0
+dhcp-lease-max=150`*/
+  let txt = `interface=mainbr
+
+dhcp-range=192.168.100.50,192.168.100.100,255.255.255.0,1h
+
+dhcp-option=option:router,192.168.100.2
+dhcp-option=option:dns-server,192.168.1.1
+
+dhcp-host=52:54:00:01:21:ba,192.168.100.10,csminidev-dockers # dockers
+dhcp-host=52:54:00:a8:c2:6a,192.168.100.13 # ollama
+dhcp-host=52:54:00:55:4c:93,192.168.100.14,Oracle12c # oracle12c
+dhcp-host=52:54:00:66:45:70,192.168.100.15 # wine-reports
+dhcp-host=52:54:00:5e:c1:5a,192.168.100.16,DisksChecker
+
 dhcp-lease-max=150`
     return txt
   }

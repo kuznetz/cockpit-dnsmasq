@@ -13,13 +13,16 @@ class DnsmasqConfigFormatter {
 
   formatConfig(config) {
     let lines = [];
-    
+
+    lines.push(`port=0 #disable dns`);
+    lines.push(''); // Empty line for separation
+
     // Format interfaces
     if (config.interfaces && config.interfaces.length > 0) {
       for (const iface of config.interfaces) {
         lines.push(`interface=${iface}`);
       }
-      lines.push(''); // Empty line for separation
+      lines.push('');
     }
 
     // Format DHCP range
