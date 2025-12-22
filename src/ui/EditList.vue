@@ -66,6 +66,9 @@
     },
     
     methods: {
+      save() {
+        this.add()
+      },
       add() {
         if (this.newValue) {
           this.newItems.push(this.newValue)

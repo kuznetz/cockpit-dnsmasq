@@ -19,7 +19,7 @@ class DnsmasqConfigParser {
         router: null,           // Option 3
         dnsServers: [],        // Option 6
         domainName: null,      // Option 15
-        broadcast: null,       // Option 28
+        //broadcast: null,       // Option 28
         ntpServers: [],        // Option 42
         dhcpHosts: [],
         leaseTime: null,
@@ -122,7 +122,7 @@ class DnsmasqConfigParser {
       'dns-server': '6', 
       'domain-name': '15',
       'ntp-server': '42',
-      'broadcast': '28'
+      //'broadcast': '28'
     }    
     if (code.startsWith('option:')) {
       const optionName = code.substring(7);
@@ -134,7 +134,7 @@ class DnsmasqConfigParser {
       case '3': this.config.router = vals[0]; break;
       case '6': this.config.dnsServers.push(...vals); break;
       case '15': this.config.domainName = vals[0]; break;
-      case '28': this.config.broadcast = vals[0]; break;
+      //case '28': this.config.broadcast = vals[0]; break;
       case '42': this.config.ntpServers.push(...vals); break;
     };
     // Gateway/Router: dhcp-option=option:router,192.168.1.1 or dhcp-option=3,192.168.1.1.

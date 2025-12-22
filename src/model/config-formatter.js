@@ -52,11 +52,6 @@ class DnsmasqConfigFormatter {
       lines.push(`dhcp-lease-max=${config.dhcpLeaseMax}`);
     }
 
-    // Format lease time if specified separately
-    if (config.leaseTime) {
-      lines.push(`# Note: lease time is configured via dhcp-option=2,${config.leaseTime}`);
-    }
-
     return lines.join(this.lineEnding).trim() + this.lineEnding;
   }
 
@@ -97,9 +92,9 @@ class DnsmasqConfigFormatter {
       lines.push(`dhcp-option=option:domain-name,${config.domainName}`);
     }    
     // Broadcast Address (Option 28)
-    if (config.broadcast) {
-      lines.push(`dhcp-option=option:broadcast,${config.broadcast}`);
-    }    
+    // if (config.broadcast) {
+    //   lines.push(`dhcp-option=option:broadcast,${config.broadcast}`);
+    // }
     // NTP Servers (Option 42)
     if (config.ntpServers && config.ntpServers.length > 0) {
       lines.push(`dhcp-option=option:ntp-server,${config.ntpServers.join(',')}`);
@@ -154,7 +149,7 @@ class DnsmasqConfigFormatter {
       router: null,
       dnsServers: [],
       domainName: null,
-      broadcast: null,
+      //broadcast: null,
       ntpServers: [],
       dhcpHosts: [],
       leaseTime: null,

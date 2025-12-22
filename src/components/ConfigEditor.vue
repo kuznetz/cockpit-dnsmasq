@@ -65,19 +65,7 @@
                   <div v-if="errors.router" class="error-text">{{ errors.router }}</div>
                 </div>
               </div>
-
-              <div style="width: 150px">
-                <label for="broadcast-address">Broadcast Address</label>
-                <input
-                  type="text"
-                  id="broadcast-address"
-                  :value="config.broadcast"
-                  @input="config.broadcast = $event.target.value"
-                  placeholder="192.168.10.255"
-                  :class="{ 'error-input': errors.broadcast }"
-                />
-                <div v-if="errors.broadcast" class="error-text">{{ errors.broadcast }}</div>
-              </div>              
+             
             </div>
 
             <div class="flex-row" style="gap: 16px">
@@ -133,7 +121,7 @@
         <div class="card" style="width: 200px">
           <div class="card-title">Interfaces</div>
           <div class="card-body padding">
-            <EditList @changed="config.interfaces = $event" :items="config.interfaces" placeholder="eth0" />
+            <EditList ref="editIfaces" @changed="config.interfaces = $event" :items="config.interfaces" placeholder="eth0" />
           </div>
         </div>
 
@@ -141,7 +129,7 @@
         <div class="card" style="width: 200px">
           <div class="card-title">DNS Servers</div>
           <div class="card-body padding">
-            <EditList @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
+            <EditList ref="editDns" @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
           </div>
         </div>
 
@@ -150,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import EditList from '../ui/EditList.vue'
 
 const props = defineProps({
@@ -167,7 +155,6 @@ const props = defineProps({
       router: '',
       dnsServers: [],
       domainName: '',
-      broadcast: '',
       dhcpLeaseMax: 0
     })
   },
@@ -179,7 +166,9 @@ const props = defineProps({
 
 const config = ref({ ...props.initialConfig })
 const errors = ref({})
-
+const editIfaces = ref(null)
+const editDns = ref(null)
+ 
 // Watch for changes in initialConfig prop
 watch(() => props.initialConfig, (newConfig) => {
   config.value = { ...newConfig }
@@ -229,10 +218,6 @@ function validateForm() {
       }
     })
   }
-  // Validate broadcast
-  if (config.value.broadcast && !validateIpAddress(config.value.broadcast)) {
-    newErrors.broadcast = 'Valid broadcast address is required'
-  }
   // Validate DHCP lease max
   if (config.value.dhcpLeaseMax < 1 || config.value.dhcpLeaseMax > 10000) {
     newErrors.dhcpLeaseMax = 'DHCP lease max must be between 1 and 10000'
@@ -241,7 +226,10 @@ function validateForm() {
   return Object.keys(newErrors).length === 0
 }
 
-function getConfig() {
+async function getConfig() {
+  editIfaces.value.save()
+  editDns.value.save()
+  await nextTick()
   return config.value
 }
 

@@ -1,17 +1,24 @@
 # Cockpit Dnsmasq
 
 ## Key Features
+- Restart/Reload service
 - View DHCP Leases
-- Set static DHCP Hosts
+- Remove DHCP Leases
+- Set static DHCP Hosts by DHCP Leases
 - Edit DHCP values: IP range, gateways, DNS, Lease Time
-- Edit network Interfaces
+- Edit network interfaces list
+- Test new config before overwrite
+- Don't need server backend (except cockpit)
+- Dark theme support
 
 ## Technical Details
-
+- **Only DHCP configuration, DNS not supported**
 - **Only IPv4 support**
 - **Only single IP range**
-- **Framework**: Built with VUE3 with custom skeleton based css
-- **Privileges**: Requires superuser access for config modifications
+- **Don't support dnsmasq.d directory**
+- Built with VUE3 with custom skeleton based css
+- Requires superuser access for config modifications
+- Tested on Debian 12
 
 ## Using prebuild release
 
@@ -35,5 +42,5 @@ npm run build
 
 ## Requirements
 - Cockpit installed and running
-- dnsmasq service active
+- dnsmasq service installed
 - Node.js and npm for development builds

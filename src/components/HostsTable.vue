@@ -183,7 +183,7 @@ const addRow = (value) => {
     mac: '',
     ip: '',
     hostname: '',
-    leaseTime: '1h'
+    leaseTime: ''
   }
   
   if (value !== '') {
@@ -207,7 +207,7 @@ const removeRow = (index) => {
   const newData = newHosts.value.filter((_, i) => i !== index)
   newHosts.value = newData
   editingIndex.value = null
-  emit('change', newData)
+  emit('change', newHosts.value)
 }
 
 const cancelEditing = (index) => {
@@ -259,6 +259,17 @@ const columns = [
   { key: 'comment', title: 'Comment' },
   { key: 'actions', title: '' }
 ]
+
+function getHosts() {
+  if (editingIndex.value !== null) {
+    confirmEditing()
+  }
+  return newHosts.value
+}
+
+defineExpose({
+  getHosts
+})
 
 onMounted(async () => {
   console.log('EditSvg',EditSvg)

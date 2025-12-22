@@ -71,10 +71,11 @@
             DHCP Hosts
           </div>
           <div class="card-body">
-            <HostsTable 
+            <HostsTable
               :hosts="parsedConf.dhcpHosts" 
               :leases="leases" 
               @change="handleNewHosts"
+              ref="hostsTableUi"
             />
           </div>
         </div>
@@ -115,6 +116,7 @@ const parsedConf = ref(null)
 const leases = ref(null)
 const notification = ref(null)
 const configEditorUi = ref(null)
+const hostsTableUi = ref(null)
 const configPath = ref('/etc/dnsmasq.conf')
 
 // Methods
@@ -146,17 +148,19 @@ const showNotification = (message) => {
 }
 
 const handleNewHosts = async (newHosts) => {
-  console.log('newHosts', newHosts)
 }
 
 const handleSave = async () => {
   if (!configEditorUi.value.validateForm()) {
     return
   }
-  let config = configEditorUi.value.getConfig()
+  let config = await configEditorUi.value.getConfig()
+  config.dhcpHosts = await hostsTableUi.value.getHosts()
+  //TODO: Remove from leases new hosts
   let newText = DnsmasqConfigFormatter.format(config)
   try {
     await DnsmasqApi.saveConfig(configPath.value, newText)
+    await DnsmasqApi.reloadService();
     showNotification("Configuration saved successfully")
   } catch (error) {
     console.error("Failed to save configuration:", error)
