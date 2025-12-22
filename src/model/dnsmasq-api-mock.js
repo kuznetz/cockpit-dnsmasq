@@ -26,6 +26,10 @@ class DnsmasqApi {
     console.log('MOCK reloadService')
   }
 
+  static async getConfigPath() {
+    return "/etc/dnsmasq-mock.conf"
+  }  
+
   static async readConfig() {
     let txt = `# Single Interface
 interface=eth0
@@ -43,15 +47,16 @@ dhcp-option=28,192.168.10.255     # Broadcast
 
 # Static leases for eth0
 # Office devices
-dhcp-host=aa:bb:cc:dd:ee:ff,192.168.10.50,office-printer,infinite
+dhcp-host=aa:bb:cc:dd:ee:ff,192.168.10.50,office-printer,infinite #LAN printer
 dhcp-host=11:22:33:44:55:66,192.168.10.51,server,24h
+dhcp-host=11:22:33:44:55:64,192.168.10.52,server2
 
 # Limit leases for eth0
 dhcp-lease-max=150`
     return txt
   }
 
-  static async saveConfig(content) {
+  static async saveConfig(configPath, content) {
     console.log('MOCK saveConfig', content)
   }
 

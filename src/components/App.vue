@@ -9,7 +9,7 @@
         <!-- Service Status -->
         <ServiceStatus />        
       </div>
-    </div>    
+    </div>
 
       <!-- Notification -->
       <div 
@@ -45,6 +45,26 @@
           </div>
         </div>
         
+        <h3>Configuration Editor</h3>
+
+        <div style="margin-bottom: 10px;">
+          <div class="form-group">
+            <label for="config-path">Config path:</label>
+            <input
+              id="config-path"
+              type="text"
+              :value="configPath"
+              @input="configPath = $event.target.value"
+              placeholder=""
+            />
+          </div>
+            <div style="text-align: center; margin-top: 5px">
+              <button @click="loadConfig()" class="btn btn-secondary">
+                Reload config
+              </button>
+            </div>
+        </div>
+        
         <!-- DHCP Hosts -->
         <div class="card card-default" style="margin-bottom: 20px">
           <div class="card-title">
@@ -52,7 +72,6 @@
           </div>
           <div class="card-body">
             <HostsTable 
-              v-if="parsedConf"
               :hosts="parsedConf.dhcpHosts" 
               :leases="leases" 
               @change="handleNewHosts"
@@ -62,10 +81,16 @@
 
         <!-- Config Editor -->
         <ConfigEditor 
-          v-if="parsedConf" 
+          ref="configEditorUi"
           :initial-config="parsedConf" 
-          @save="handleSaveConfig"
-        />          
+        />
+
+        <!-- Action Buttons -->
+        <div style="text-align: center; padding: 10px">
+          <button @click="handleSave" class="primary-invert">
+            Save Configuration
+          </button>
+        </div>
 
       </div>
   </div>
@@ -81,6 +106,7 @@ import ServiceStatus from './ServiceStatus.vue'
 
 import DnsmasqApi from 'dnsmasq-api'
 import DnsmasqConfigParser from '../model/config-parser-single.js'
+import DnsmasqConfigFormatter from '../model/config-formatter.js'
 
 // Reactive state
 const loaded = ref(false)
@@ -88,11 +114,13 @@ const configText = ref(null)
 const parsedConf = ref(null)
 const leases = ref(null)
 const notification = ref(null)
+const configEditorUi = ref(null)
+const configPath = ref('/etc/dnsmasq.conf')
 
 // Methods
 const loadConfig = async () => {
   try {
-    const content = await DnsmasqApi.readConfig()
+    const content = await DnsmasqApi.readConfig(configPath.value)
     const hosts = DnsmasqConfigParser.parse(content)
     parsedConf.value = hosts
     configText.value = content
@@ -121,9 +149,14 @@ const handleNewHosts = async (newHosts) => {
   console.log('newHosts', newHosts)
 }
 
-const handleSaveConfig = async () => {
+const handleSave = async () => {
+  if (!configEditorUi.value.validateForm()) {
+    return
+  }
+  let config = configEditorUi.value.getConfig()
+  let newText = DnsmasqConfigFormatter.format(config)
   try {
-    await DnsmasqApi.saveConfig(configText.value)
+    await DnsmasqApi.saveConfig(configPath.value, newText)
     showNotification("Configuration saved successfully")
   } catch (error) {
     console.error("Failed to save configuration:", error)
@@ -135,6 +168,7 @@ onMounted(async () => {
   loaded.value = false
   try {
     await DnsmasqApi.init()
+    configPath.value = await DnsmasqApi.getConfigPath()
     await Promise.all([loadConfig(), loadLeases()])
     loaded.value = true
   } catch (error) {

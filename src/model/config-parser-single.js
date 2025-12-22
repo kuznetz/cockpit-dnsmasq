@@ -1,112 +1,160 @@
+import DhcpRangeParser from "./dhcp-range-parser.js";
+
+function parseIntOrNull(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const num = Number(value);
+  if (Number.isInteger(num) && isFinite(num)) {
+    return num;
+  }
+  return null;
+}
+
 class DnsmasqConfigParser {
   constructor() {
     this.config = {
         interfaces: [],
         dhcpRange: null,
-        //dhcpOptions: [],
-        routers: [],           // Option 3
+        router: null,           // Option 3
         dnsServers: [],        // Option 6
         domainName: null,      // Option 15
         broadcast: null,       // Option 28
+        ntpServers: [],        // Option 42
         dhcpHosts: [],
-        dhcpLeaseMax: null      
+        leaseTime: null,
+        dhcpLeaseMax: null
     };
   }
 
   static parse(configText) {
-      return new DnsmasqConfigParser().parse(configText);
+      console.log('parse config...')
+      const parser = new DnsmasqConfigParser()
+      const lines = parser.parseText(configText);
+      console.log('lines',lines)
+      const config = parser.parseLines(lines);
+      console.log('config',config)
+      return config
   }
 
-  parse(configText) {
+  parseText(configText) {
     const lines = configText.split('\n');
-
+    let result = []
     for (const i in lines) {
-      let [trimmedLine, comment] = lines[i].split('#').map(part => part.trim())
-      comment = comment || ''
-      if (!trimmedLine) continue;
-
-      let lineParts = trimmedLine.split('=')
-      if (lineParts.length < 1) continue;
-      let param = lineParts[0].trim()
-      let value = lineParts.slice(1).join('=').trim()
-
-      // Parse interface declaration
-      if (param === 'interface') {
-        this.config.interfaces.push(value)
-        continue;
+      let trimmedLine = ''
+      let comment = null
+      let lineParts = lines[i].split('#')
+      if (lineParts.length > 0) {
+        trimmedLine = lineParts[0].trim()
+        if (lineParts.length > 1) {
+          comment = lineParts.slice(1).join('#').trim()      
+        }
       }
 
-      // Parse dhcp-range
-      if (param === 'dhcp-range') {
-        this._parseDhcpRange(value);
-        continue;
+      let param = null
+      let value = null
+      lineParts = trimmedLine.split('=')
+      if (lineParts.length > 0) {
+        param = lineParts[0].trim()
+        if (lineParts.length > 1) {
+          value = lineParts.slice(1).join('=').trim()      
+        }
       }
-
-      // Parse dhcp-option
-      if (param === 'dhcp-option') {
-        this._parseDhcpOption(value);
-        continue;
-      }
-
-      // Parse dhcp-host
-      if (param === 'dhcp-host') {
-        this._parseDhcpHost(value);
-        continue;
-      }
-
-      // Parse dhcp-lease-max
-      if (param === 'dhcp-lease-max') {
-        this._parseDhcpLeaseMax(value);
-        continue;
-      }
-
+      result.push([param, value, comment])
     }
+    return result
+  }
 
+  parseLines(lines) {
+    for (const i in lines) {
+      let [param, value, comment] = lines[i];    
+      if (!param) continue;
+      switch (param) {
+        case 'interface':
+          // Parse interface declaration
+          this.config.interfaces.push(value);
+          break;        
+        case 'dhcp-range':
+          // Parse dhcp-range
+          this._parseDhcpRange(value);
+          break;        
+        case 'dhcp-option':
+          // Parse dhcp-option
+          this._parseDhcpOption(value);
+          break;        
+        case 'dhcp-host':
+          // Parse dhcp-host - assign static IP addresses to specific devices
+          this._parseDhcpHost(value, comment);
+          break;
+        case 'dhcp-lease-max':
+          // Parse dhcp-lease-max - maximum number of concurrent DHCP leases
+          this.config.dhcpLeaseMax = value;
+          break;
+      }
+    }
     return this.config;
   }
 
   _parseDhcpRange(value) {
-    const parts = value.split(',');
-    const range = {
-      start: parts[0],
-      end: parts[1],
-      netmask: parts[2],
-      leaseTime: parts[3]
-    };    
-    this.config.dhcpRange = range;
+    const rangeParser = new DhcpRangeParser()
+    let range = rangeParser.parse(value)
+    if (range.leaseTime) {
+      this.config.leaseTime = range.leaseTime
+      range.leaseTime = null
+    }
+    if (range.router) {
+      this.config.router = range.router
+      range.router = null
+    }
+    this.config.dhcpRange = range
   }
 
   _parseDhcpOption(value) {
     const parts = value.split(',')
-    if (parts.length < 2) throw new Error(`Invalid dhcp-option: ${value}`);
-    const val2 = parts.slice(1).join(',').trim()
-    switch (parts[0].trim()) {
-      case '3': this.config.routers.push(val2); break;
-      case '6': this.config.dnsServers.push(val2); break;
-      case '15': this.config.domainName = val2; break;
-      case '28': this.config.broadcast = val2; break;
+    if (parts.length < 2) return; // Skip invalid dhcp-option
+    
+    let code = parts[0].trim().toLowerCase()
+    const vals = parts.slice(1).map(v => v.trim()).filter(v => v !== '')
+    
+    // Convert option names to codes if needed
+    const optionMap = {
+      'router': '3',
+      'dns-server': '6', 
+      'domain-name': '15',
+      'ntp-server': '42',
+      'broadcast': '28'
+    }    
+    if (code.startsWith('option:')) {
+      const optionName = code.substring(7);
+      code = optionMap[optionName] || code;
+    }
+
+    switch (parts[0].trim()) {      
+      case '2': this.leaseTime = vals[0]; break;
+      case '3': this.config.router = vals[0]; break;
+      case '6': this.config.dnsServers.push(...vals); break;
+      case '15': this.config.domainName = vals[0]; break;
+      case '28': this.config.broadcast = vals[0]; break;
+      case '42': this.config.ntpServers.push(...vals); break;
     };
-    // const option = {
-    //   code: parseInt(parts[0]),
-    //   values: parts.slice(1)
-    // };    
-    // this.config.dhcpOptions.push(option);
+    // Gateway/Router: dhcp-option=option:router,192.168.1.1 or dhcp-option=3,192.168.1.1.
+    // DNS Servers: dhcp-option=option:dns-server,8.8.8.8,1.1.1.1 or dhcp-option=6,8.8.8.8,1.1.1.1 (Primary, Secondary).
+    // Domain Name: dhcp-option=option:domain-name,mylocalnet.lan or dhcp-option=15,mylocalnet.lan.
+    // NTP Server: dhcp-option=option:ntp-server,192.168.1.100 or dhcp-option=42,192.168.1.100.
+    // Lease Time: dhcp-option=2,86400 (86400 seconds = 24 hours).
   }
 
-  _parseDhcpHost(value) {
-    const parts = value.split(',');
+  _parseDhcpHost(value, comment) {
+    const parts = value.split(',').map(p => p.trim());
+    if (parts.length < 2) return;    
     const host = {
       mac: parts[0],
-      ip: parts[1],
-      hostname: parts[2],
-      leaseTime: parts[3]
-    };
-    
+      ip: parts[1] || null,
+      hostname: parts[2] || null,
+      leaseTime: parts[3] || null,
+      comment
+    };    
     this.config.dhcpHosts.push(host);
-  }
-
-  _parseDhcpLeaseMax(value) {
-    this.config.dhcpLeaseMax = parseInt(value);
   }
 
 }

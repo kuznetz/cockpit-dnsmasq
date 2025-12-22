@@ -1,7 +1,5 @@
 <template>
-  <div class="dhcp-config-editor" style="margin-bottom: 20px">
-    <h3>DHCP Configuration Editor</h3>
-
+  <div>
     <div class="flex-row" style="gap: 5px">
 
         <!-- DHCP Range -->
@@ -17,7 +15,7 @@
                     type="text"
                     :value="config.dhcpRange.start"
                     @input="handleDhcpRangeChange('start', $event.target.value)"
-                    placeholder="192.168.10.100"
+                    placeholder="0.0.0.0"
                     :class="{ 'error-input': errors.dhcpRangeStart }"
                   />
                   <div v-if="errors.dhcpRangeStart" class="error-text">{{ errors.dhcpRangeStart }}</div>
@@ -31,12 +29,13 @@
                     type="text"
                     :value="config.dhcpRange.end"
                     @input="handleDhcpRangeChange('end', $event.target.value)"
-                    placeholder="192.168.10.200"
+                    placeholder="0.0.0.0"
                     :class="{ 'error-input': errors.dhcpRangeEnd }"
                   />
                   <div v-if="errors.dhcpRangeEnd" class="error-text">{{ errors.dhcpRangeEnd }}</div>
                 </div>
               </div>
+
               <div style="width: 150px">
                 <div class="form-group">
                   <label for="dhcp-netmask">Netmask</label>
@@ -49,6 +48,21 @@
                     :class="{ 'error-input': errors.dhcpRangeNetmask }"
                   />
                   <div v-if="errors.dhcpRangeNetmask" class="error-text">{{ errors.dhcpRangeNetmask }}</div>
+                </div>
+              </div>
+
+              <div style="width: 150px">
+                <div class="form-group">
+                  <label for="dhcp-gateway">Gateway</label>
+                  <input
+                    id="dhcp-gateway"
+                    type="text"
+                    :value="config.router"
+                    @input="config.router = $event.target.value"
+                    placeholder="0.0.0.0"
+                    :class="{ 'error-input': errors.dhcpRangeNetmask }"
+                  />
+                  <div v-if="errors.router" class="error-text">{{ errors.router }}</div>
                 </div>
               </div>
 
@@ -123,14 +137,6 @@
           </div>
         </div>
 
-        <!-- Routers -->
-        <div class="card" style="width: 200px">
-          <div class="card-title">Gateways</div>
-          <div class="card-body padding">
-            <EditList @changed="config.routers = $event" :items="config.routers" placeholder="192.168.0.1" />
-          </div>
-        </div>
-
         <!-- DNS Servers -->
         <div class="card" style="width: 200px">
           <div class="card-title">DNS Servers</div>
@@ -140,14 +146,6 @@
         </div>
 
     </div>
-
-    <!-- Action Buttons -->
-    <div style="text-align: center; padding: 10px">
-      <button @click="handleSave" class="primary-invert">
-        Save Configuration
-      </button>
-    </div>
-
   </div>
 </template>
 
@@ -159,18 +157,18 @@ const props = defineProps({
   initialConfig: {
     type: Object,
     default: () => ({
-      interfaces: ['eth0'],
+      interfaces: [],
       dhcpRange: {
-        start: '192.168.10.100',
-        end: '192.168.10.200',
-        netmask: '255.255.255.0',
-        leaseTime: '24h'
+        start: '',
+        end: '',
+        netmask: '',
+        leaseTime: ''
       },
-      routers: ['192.168.10.1'],
-      dnsServers: ['192.168.10.1'],
-      domainName: 'office.local',
-      broadcast: '192.168.10.255',
-      dhcpLeaseMax: 150
+      router: '',
+      dnsServers: [],
+      domainName: '',
+      broadcast: '',
+      dhcpLeaseMax: 0
     })
   },
   onSave: {
@@ -198,12 +196,7 @@ const validateIpAddress = (ip) => {
   })
 }
 
-const validateLeaseTime = (leaseTime) => {
-  const leaseRegex = /^(\d+)([hmd])$/
-  return leaseRegex.test(leaseTime)
-}
-
-const validateForm = () => {
+function validateForm() {
   const newErrors = {}
 
   // Validate interfaces
@@ -221,17 +214,11 @@ const validateForm = () => {
   if (!config.value.dhcpRange.netmask || !validateIpAddress(config.value.dhcpRange.netmask)) {
     newErrors.dhcpRangeNetmask = 'Valid netmask is required'
   }
-  if (!config.value.dhcpRange.leaseTime || !validateLeaseTime(config.value.dhcpRange.leaseTime)) {
-    newErrors.dhcpRangeLeaseTime = 'Valid lease time required (e.g., 24h, 7d)'
+  if (config.value.router && !validateIpAddress(config.value.router)) {
+    newErrors.router = 'Invalid gateway'
   }
-
-  // Validate routers
-  if (config.value.routers && config.value.routers.length > 0) {
-    config.value.routers.forEach((router, index) => {
-      if (!validateIpAddress(router)) {
-        newErrors[`router-${index}`] = 'Valid router IP address is required'
-      }
-    })
+  if (config.value.dhcpRange.leaseTime && !validateLeaseTime(config.value.dhcpRange.leaseTime)) {
+    newErrors.dhcpRangeLeaseTime = 'Valid lease time required (e.g., 24h, 7d)'
   }
 
   // Validate DNS servers
@@ -242,25 +229,25 @@ const validateForm = () => {
       }
     })
   }
-
   // Validate broadcast
   if (config.value.broadcast && !validateIpAddress(config.value.broadcast)) {
     newErrors.broadcast = 'Valid broadcast address is required'
   }
-
   // Validate DHCP lease max
   if (config.value.dhcpLeaseMax < 1 || config.value.dhcpLeaseMax > 10000) {
     newErrors.dhcpLeaseMax = 'DHCP lease max must be between 1 and 10000'
   }
-
   errors.value = newErrors
   return Object.keys(newErrors).length === 0
 }
 
-const handleSave = () => {
-  if (validateForm()) {
-    props.onSave(config.value)
-  }
+function getConfig() {
+  return config.value
+}
+
+const validateLeaseTime = (leaseTime) => {
+  const leaseRegex = /^(\d+)([hmd])$/
+  return leaseRegex.test(leaseTime)
 }
 
 const handleDhcpRangeChange = (field, value) => {
@@ -269,4 +256,9 @@ const handleDhcpRangeChange = (field, value) => {
     [field]: value
   }
 }
+
+defineExpose({
+  validateForm,
+  getConfig
+})
 </script>

@@ -27,14 +27,63 @@ class DnsmasqApi {
     return cockpit.spawn(["systemctl", "reload", "dnsmasq"], { superuser: true });
   }
 
-  // File operations
-  static async readConfig() {
-    return cockpit.file("/etc/dnsmasq.conf").read();
+  static async getConfigPath() {
+    return "/etc/dnsmasq.conf"
   }
 
-  static async saveConfig(content) {
-    return cockpit.file("/etc/dnsmasq.conf").replace(content);
+  // File operations
+  static async readConfig(configPath) {
+    return cockpit.file(configPath).read();
   }
+
+  static async saveConfig(configPath, content) {
+    const newConfigPath = `${configPath}.new`;
+    const backupPath = `${configPath}.bak`;  
+    try {
+      //Save to temporary new file
+      await cockpit.file(newConfigPath).replace(content);
+      //Validate dnsmasq configuration (if it's a dnsmasq config)
+      if (configPath.includes('dnsmasq')) {
+        try {
+          await cockpit.spawn(['dnsmasq', '--test', '-C', newConfigPath]);
+          console.log('DNSmasq configuration validation passed');
+        } catch (error) {
+          // Remove the invalid new config file
+          await cockpit.file(newConfigPath).remove();
+          throw new Error(`DNSmasq configuration invalid: ${error.message}`);
+        }
+      }
+      
+      //Backup original file if it exists
+      try {
+        const exists = await cockpit.file(configPath).stat();
+        if (exists) {
+          const originalContent = await cockpit.file(configPath).read();
+          await cockpit.file(backupPath).replace(originalContent);
+          console.log(`Backup created at: ${backupPath}`);
+        }
+      } catch (error) {
+        //Original file might not exist, that's OK
+        console.log('No original file to backup');
+      }
+      
+      //Replace original with new config
+      await cockpit.file(configPath).replace(content);
+      await cockpit.file(newConfigPath).remove();
+      console.log(`Configuration successfully saved to: ${configPath}`);
+      
+    } catch (error) {
+      // Clean up temporary file on error
+      try {
+        await cockpit.file(newConfigPath).remove();
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+      
+      console.error('Failed to save configuration:', error);
+      throw error;
+    }
+}
 
   static async readLeases() {
     let txt = await cockpit.file("/var/lib/misc/dnsmasq.leases").read();

@@ -64,8 +64,18 @@
                   class="pf-c-form-control"
                   :value="item.leaseTime"
                   @input="(e) => handleInputChange(index, 'leaseTime', e.target.value)"
-                  placeholder="infinite"
+                  placeholder="default"
                   :aria-label="`Lease time for row ${index + 1}`"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="pf-c-form-control"
+                  :value="item.comment"
+                  @input="(e) => handleInputChange(index, 'comment', e.target.value)"
+                  placeholder="comment"
+                  :aria-label="`Comment for row ${index + 1}`"
                 />
               </td>
               <td style="text-align: right; width: 250px;">
@@ -93,6 +103,7 @@
               <td>{{ item.ip }}</td>
               <td>{{ item.hostname }}</td>
               <td>{{ item.leaseTime }}</td>
+              <td>{{ item.comment }}</td>
               <td style="text-align: right;">
                 <button
                   class="pf-c-button pf-m-link pf-m-small"
@@ -245,7 +256,8 @@ const columns = [
   { key: 'ip', title: 'IP Address' },
   { key: 'hostname', title: 'Hostname' },
   { key: 'leaseTime', title: 'Lease Time' },
-  { key: 'actions', title: 'Actions' }
+  { key: 'comment', title: 'Comment' },
+  { key: 'actions', title: '' }
 ]
 
 onMounted(async () => {
