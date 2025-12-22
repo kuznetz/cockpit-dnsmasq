@@ -37,45 +37,44 @@ class DnsmasqApi {
   }
 
   static async saveConfig(configPath, content) {
+    console.log('saveConfig', content)
     const newConfigPath = `${configPath}.new`;
     const backupPath = `${configPath}.bak`;  
     try {
       //Save to temporary new file
-      await cockpit.file(newConfigPath).replace(content);
+      try {
+        await cockpit.file(newConfigPath, { superuser: "require" }).replace(content);
+      } catch (error) {
+        throw new Error(`Failed to write file ${newConfigPath}: ${error.message}`);
+      }
       //Validate dnsmasq configuration (if it's a dnsmasq config)
       if (configPath.includes('dnsmasq')) {
         try {
-          await cockpit.spawn(['dnsmasq', '--test', '-C', newConfigPath]);
+          await cockpit.spawn(['dnsmasq', '--test', '-C', newConfigPath], { superuser: "try" });
           console.log('DNSmasq configuration validation passed');
         } catch (error) {
           // Remove the invalid new config file
-          await cockpit.file(newConfigPath).remove();
+          await cockpit.spawn(["rm", "-f", newConfigPath], { superuser: "require" })
           throw new Error(`DNSmasq configuration invalid: ${error.message}`);
         }
       }
       
       //Backup original file if it exists
-      try {
-        const exists = await cockpit.file(configPath).stat();
-        if (exists) {
-          const originalContent = await cockpit.file(configPath).read();
-          await cockpit.file(backupPath).replace(originalContent);
-          console.log(`Backup created at: ${backupPath}`);
-        }
-      } catch (error) {
-        //Original file might not exist, that's OK
-        console.log('No original file to backup');
+      const originalContent = await cockpit.file(configPath, { superuser: "try" }).read();
+      if (originalContent !== null) {
+        await cockpit.file(backupPath, { superuser: "require" }).replace(originalContent);
+        console.log(`Backup created at: ${backupPath}`);
       }
       
       //Replace original with new config
-      await cockpit.file(configPath).replace(content);
-      await cockpit.file(newConfigPath).remove();
+      await cockpit.file(configPath, { superuser: "require" }).replace(content);
+      await cockpit.spawn(["rm", "-f", newConfigPath], { superuser: "require" })
       console.log(`Configuration successfully saved to: ${configPath}`);
       
     } catch (error) {
       // Clean up temporary file on error
       try {
-        await cockpit.file(newConfigPath).remove();
+        await cockpit.spawn(["rm", "-f", newConfigPath], { superuser: "require" })
       } catch (cleanupError) {
         // Ignore cleanup errors
       }

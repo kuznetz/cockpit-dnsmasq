@@ -8,6 +8,8 @@
 
 ## Technical Details
 
+- **Only IPv4 support**
+- **Only single IP range**
 - **Framework**: Built with VUE3 with custom skeleton based css
 - **Privileges**: Requires superuser access for config modifications
 

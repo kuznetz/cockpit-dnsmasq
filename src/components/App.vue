@@ -105,7 +105,7 @@ import ConfigEditor from './ConfigEditor.vue'
 import ServiceStatus from './ServiceStatus.vue'
 
 import DnsmasqApi from 'dnsmasq-api'
-import DnsmasqConfigParser from '../model/config-parser-single.js'
+import DnsmasqConfigParser from '../model/config-parser.js'
 import DnsmasqConfigFormatter from '../model/config-formatter.js'
 
 // Reactive state

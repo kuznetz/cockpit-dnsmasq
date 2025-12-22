@@ -69,12 +69,12 @@ class DnsmasqConfigFormatter {
     if (dhcpRange.end) {
       parts.push(dhcpRange.end);
     }
+    if (dhcpRange.netmask) {
+      parts.push(dhcpRange.netmask);
+    }
     if (leaseTime) {
       parts.push(leaseTime);
     }
-    if (dhcpRange.netmask) {
-      parts.push(`netmask:${dhcpRange.netmask}`);
-    }    
     return `dhcp-range=${parts.join(',')}`;
   }
 
