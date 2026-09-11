@@ -4,20 +4,16 @@
       <div class="flex-grow form-static">
         {{ option }}
       </div>
-      <div>
-        <button @click="del(idx)">
-          <VSvg :src="DeleteSvg" fill="currentColor" class="icon" />
-        </button>
-      </div>
+      <pf-button variant="link" @click="del(idx)">
+        <VSvg :src="DeleteSvg" fill="currentColor" class="icon"  style="height: 16px" />
+      </pf-button>
     </div>
     <div class="flex-row">
-      <div class="flex-grow">
-        <input ref="addInp" @keydown.enter="add()" type="text" v-model="newValue" :placeholder="placeholder">
-      </div>
+      <input ref="addInp" @keydown.enter="add()" type="text" v-model="newValue" :placeholder="placeholder" class="flex-grow">
       <div>
-        <button @click="add()" class="primary">
-          <VSvg :src="AddSvg" fill="currentColor" class="icon" />
-        </button>
+        <pf-button variant="link" @click="add()">
+          <VSvg :src="AddSvg" fill="currentColor" style="height: 16px" />
+        </pf-button>
       </div>
     </div>    
   </div>

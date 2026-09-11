@@ -37,8 +37,8 @@
               </div>
             </div>
 
-            <div v-else-if="activeTab === 'dhcp'">
-              <ConfigEditor ref="configEditorUi" :initial-config="parsedConf" />
+            <div v-else-if="activeTab === 'dhcpv4'">
+              <Dhcpv4Editor ref="configEditorUi" :initial-config="parsedConf" />
               <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
                 <pf-button variant="primary" @click="handleSave">
                   Save Configuration
@@ -116,7 +116,7 @@ import { ref, onMounted } from 'vue'
 import DhcpTable from './components/DhcpTable.vue'
 import HostsTable from './components/HostsTable.vue'
 import NetworkEditor from './components/NetworkEditor.vue'
-import ConfigEditor from './components/ConfigEditor.vue'
+import Dhcpv4Editor from './components/Dhcpv4Editor.vue'
 import ServiceStatus from './components/ServiceStatus.vue'
 import ParserWarnings from './components/ParserWarnings.vue'
 
@@ -139,7 +139,7 @@ const activeTab = ref('network')
 
 const tabs = [
   { name: 'network', label: 'Network' },
-  { name: 'dhcp', label: 'DHCP' },
+  { name: 'dhcpv4', label: 'DHCPv4' },
   { name: 'hosts', label: 'DHCP hosts' },
   { name: 'dns',  label: 'DNS' },
   { name: 'service',  label: 'Service' },

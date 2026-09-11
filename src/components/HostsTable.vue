@@ -84,7 +84,7 @@
                   @click="cancelEditing(index)"
                   :aria-label="'Cancel editing'"
                 >
-                  <VSvg :src="CancelSvg" fill="currentColor" class="icon" />
+                  <VSvg :src="CancelSvg" fill="currentColor" class="icon" style="height: 16px" />
                   Cancel
                 </button>
                 <button
@@ -92,7 +92,7 @@
                   @click="confirmEditing"
                   :aria-label="'Save changes'"
                 >
-                  <VSvg :src="ConfirmSvg" fill="currentColor" class="icon" />
+                  <VSvg :src="ConfirmSvg" fill="currentColor" class="icon" style="height: 16px" />
                   Save
                 </button>
               </td>
@@ -104,23 +104,19 @@
               <td>{{ item.hostname }}</td>
               <td>{{ item.leaseTime }}</td>
               <td>{{ item.comment }}</td>
-              <td style="text-align: right;">
-                <button
-                  class="pf-c-button pf-m-link pf-m-small"
-                  @click="startEditing(index)"
-                  :aria-label="'Edit row'"
-                >
-                  <VSvg :src="EditSvg" fill="currentColor" class="icon" />
-                  Edit
-                </button>
-                <button
-                  class="pf-c-button pf-m-link pf-m-danger pf-m-small"
-                  @click="removeRow(index)"
-                  :aria-label="'Remove row'"
-                >
-                  <VSvg :src="DeleteSvg" fill="currentColor" class="icon" />
-                  Remove
-                </button>
+              <td class="flex-row" style="justify-content: flex-end; gap: 5px">
+                <pf-tooltip>
+                  <template #content>Edit host</template>
+                  <pf-button variant="link" @click="startEditing(index)">
+                    <VSvg :src="EditSvg" fill="currentColor" class="icon"  style="height: 16px" />
+                  </pf-button>
+                </pf-tooltip>
+                <pf-tooltip>
+                  <template #content>Delete host</template>
+                  <pf-button variant="link" @click="removeRow(index)">
+                    <VSvg :src="DeleteSvg" fill="currentColor" class="icon"  style="height: 16px" />
+                  </pf-button>
+                </pf-tooltip>
               </td>
             </template>
           </tr>

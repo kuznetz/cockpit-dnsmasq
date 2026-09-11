@@ -32,15 +32,12 @@
             {{ item.clientId }}
           </td>-->
           <td :style="{ textAlign: 'right' }">
-            <button
-              class="pf-c-button pf-m-link pf-m-danger"
-              type="button"
-              @click="removeRow(index)"
-              aria-label="Remove"
-            >
-              <i class="fas fa-trash" aria-hidden="true"></i>
-              Remove
-            </button>
+            <pf-tooltip>
+              <template #content>Remove lease</template>
+              <pf-button variant="link" @click="removeRow(index)">
+                <VSvg :src="DeleteSvg" fill="currentColor" class="icon"  style="height: 16px" />
+              </pf-button>
+            </pf-tooltip>            
           </td>
         </tr>
       </tbody>
@@ -49,6 +46,8 @@
 </template>
 
 <script setup>
+import DeleteSvg from '@/svg/trash-solid-full.svg'
+import VSvg from '../ui/VSvg.vue';
 import { defineProps } from 'vue';
 
 const props = defineProps({

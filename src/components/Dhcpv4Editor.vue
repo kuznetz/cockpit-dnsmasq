@@ -1,6 +1,11 @@
 <template>
   <div style="margin-bottom: 20px">
-    <div class="flex-row" style="gap: 20px; flex-wrap: wrap">
+
+    <div style="margin-bottom: 20px">
+      <pf-switch v-model:checked="config.dhcpEnabled" label="Enable DHCPv4" />
+    </div>
+
+    <div v-if="config.dhcpEnabled" class="flex-row" style="gap: 20px; flex-wrap: wrap">
 
       <!-- DHCP Range -->
       <pf-card class="pf-v6-u-mb-md">
@@ -8,7 +13,7 @@
         <pf-card-body>
           <pf-form>
             <div class="flex-row" style="gap: 16px; flex-wrap: wrap">
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-start-ip">Start IP</label>
                 <input
                   id="dhcp-start-ip"
@@ -17,13 +22,14 @@
                   @update:model-value="handleDhcpRangeChange('start', $event)"
                   placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeStart }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.dhcpRangeStart" variant="error">
                   {{ errors.dhcpRangeStart }}
                 </pf-form-control-helper-text>
               </pf-form-control>
 
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-end-ip">End IP</label>
                 <input
                   id="dhcp-end-ip"
@@ -32,13 +38,14 @@
                   @update:model-value="handleDhcpRangeChange('end', $event)"
                   placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeEnd }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.dhcpRangeEnd" variant="error">
                   {{ errors.dhcpRangeEnd }}
                 </pf-form-control-helper-text>
               </pf-form-control>
 
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-netmask">Netmask</label>
                 <input
                   id="dhcp-netmask"
@@ -47,13 +54,14 @@
                   @update:model-value="handleDhcpRangeChange('netmask', $event)"
                   placeholder="255.255.255.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeNetmask }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.dhcpRangeNetmask" variant="error">
                   {{ errors.dhcpRangeNetmask }}
                 </pf-form-control-helper-text>
               </pf-form-control>
 
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-gateway">Gateway</label>
                 <input
                   id="dhcp-gateway"
@@ -62,6 +70,7 @@
                   @update:model-value="config.router = $event"
                   placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.router }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.router" variant="error">
                   {{ errors.router }}
@@ -70,7 +79,7 @@
             </div>
 
             <div class="flex-row" style="gap: 16px; flex-wrap: wrap; margin-top: 16px">
-              <pf-form-control style="width: 316px">
+              <pf-form-control style="width: 280px">
                 <label for="domain-name">Domain Name</label>
                 <input
                   type="text"
@@ -78,10 +87,11 @@
                   :model-value="config.domainName"
                   @update:model-value="config.domainName = $event"
                   placeholder="office.local"
+                  style="width: 100%;"
                 />
               </pf-form-control>
 
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-lease-time">Lease Time</label>
                 <input
                   id="dhcp-lease-time"
@@ -90,13 +100,14 @@
                   @update:model-value="config.leaseTime = $event"
                   placeholder="24h"
                   :class="{ 'pf-m-error': errors.dhcpLeaseTime }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.dhcpLeaseTime" variant="error">
                   {{ errors.dhcpLeaseTime }}
                 </pf-form-control-helper-text>
               </pf-form-control>
 
-              <pf-form-control style="width: 150px">
+              <pf-form-control style="width: 130px">
                 <label for="dhcp-lease-max">DHCP Lease Max</label>
                 <input
                   type="number"
@@ -106,6 +117,7 @@
                   min="1"
                   max="10000"
                   :class="{ 'pf-m-error': errors.dhcpLeaseMax }"
+                  style="width: 100%;"
                 />
                 <pf-form-control-helper-text v-if="errors.dhcpLeaseMax" variant="error">
                   {{ errors.dhcpLeaseMax }}
@@ -144,6 +156,7 @@ const props = defineProps({
   initialConfig: {
     type: Object,
     default: () => ({
+      dhcpEnabled: false,
       interfaces: [],
       dhcpRange: {
         start: '',
