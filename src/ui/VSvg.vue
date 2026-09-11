@@ -59,11 +59,11 @@ export default {
     },
 
     processSvg(curSvg) {
-      // Если передан fill prop, заменяем fill атрибуты на currentColor
+      // If the fill prop is passed, replace fill attributes with currentColor
       if (this.fill !== null) {
         curSvg = this.replaceSvgAttributes(curSvg, 'fill', this.fill)
       }      
-      // Если передан stroke prop, заменяем stroke атрибуты на currentColor
+      // If the stroke prop is passed, replace stroke attributes with currentColor
       if (this.stroke !== null) {
         curSvg = this.replaceSvgAttributes(curSvg, 'stroke', this.stroke)
       }      
@@ -71,7 +71,7 @@ export default {
     },
 
     replaceSvgAttributes(svgString, attribute, value) {
-      // Создаем временный DOM элемент для парсинга SVG
+      // Create a temporary DOM element for parsing the SVG
       const parser = new DOMParser()
       const doc = parser.parseFromString(svgString, 'image/svg+xml')
       const svgElement = doc.documentElement
@@ -80,22 +80,22 @@ export default {
         return svgString
       }
       
-      // Функция для рекурсивной замены атрибутов
+      // Function for recursively replacing attributes
       const replaceAttributes = (element) => {
-        // Заменяем атрибут у текущего элемента
+        // Replace the attribute on the current element
         if (value) {
           element.setAttribute(attribute, value)
         } else if (element.hasAttribute(attribute)) {
           element.removeAttribute(attribute)
         }
-        // Рекурсивно обрабатываем дочерние элементы
+        // Recursively process child elements
         Array.from(element.children).forEach(child => {
           replaceAttributes(child)
         })
       }      
-      // Запускаем замену
+      // Start the replacement
       replaceAttributes(svgElement)      
-      // Возвращаем обработанный SVG как строку
+      // Return the processed SVG as a string
       return new XMLSerializer().serializeToString(svgElement)
     }
   },  
