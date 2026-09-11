@@ -21,4 +21,18 @@
     padding: 10px 10px ;
     border-top: 1px solid var(--border-color);
   }  
+
+  &.danger {
+    border-color: var(--danger-color);
+
+    .card-title {
+      border-bottom-color: var(--danger-color);
+      color: var(--danger-color);
+    }
+
+    .card-footer {
+      border-top-color: var(--danger-color);
+    }
+  }
 }
+

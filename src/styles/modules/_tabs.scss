@@ -1,0 +1,76 @@
+// Tabs
+//––––––––––––––––––––––––––––––––––––––––––––––––––
+@use '../variables' as *;
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: $tab-icon-gap;
+  height: $tab-height;
+  padding: 0 $tab-padding-x;
+  font-size: $tab-font-size;
+  font-weight: normal;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--color);
+  outline: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  position: relative;
+
+  .icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+  }
+
+  &:hover {
+    color: var(--primary-color-active);
+    background-color: var(--tab-hover-background);
+  }
+
+  &:focus {
+    color: var(--primary-color-active);
+    outline: $tab-focus-width solid var(--primary-color);
+    outline-offset: $tab-focus-offset;
+  }
+
+  &.active {
+    color: var(--primary-color);
+    font-weight: $tab-font-weight-active;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px; // перекрывает нижнюю границу контейнера
+      height: $tab-active-border-width;
+      background-color: var(--primary-color);
+    }
+
+    &:hover,
+    &:focus {
+      color: var(--primary-color-active);
+    }
+  }
+}
+
+.tab-panel {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
