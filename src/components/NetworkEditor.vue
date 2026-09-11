@@ -1,83 +1,68 @@
 <template>
-  <div>
-      <div class="card" style="margin-bottom: 20px; max-width: 1050px">
-        <div class="card-title">Network Interfaces</div>
-        <div class="card-body iface-options padding">
-          <div
-            v-for="iface in interfacesOptions"
-            :key="iface.name"
-            class="iface-option"
-          >
-            <label>
-              <input
-                type="checkbox"
-                :value="iface.name"
-                v-model="newInterfaces"
-              />
-              <span class="iface-name">{{ iface.name }}</span>
-              <span v-if="iface.state" class="iface-state">
-                ({{ iface.state }})
-              </span>
-            </label>
-          </div>
-          <div v-if="!interfacesOptions.length" class="empty">
-            No available interfaces
-          </div>
+  <div style="margin-bottom: 20px">
+    <pf-card>
+      <pf-card-title>Network Interfaces</pf-card-title>
+      <pf-card-body class="iface-options">
+
+        <pf-checkbox
+          v-for="iface in interfacesOptions"
+          :key="iface.name"
+          :id="'iface-' + iface.name"
+          :label="`${iface.name} (${iface.state})`"
+          :model-value="newInterfaces.includes(iface.name)"
+          @update:model-value="(checked) => toggleIface(iface.name, checked)"
+          class="iface-option"
+        />
+
+        <div v-if="!interfacesOptions.length" class="empty">
+          No available interfaces
         </div>
-      </div>
+
+      </pf-card-body>
+    </pf-card>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
-  // Format: [{"name":"eth0","state":"up"}, ...]
-  systemInterfaces: {
-    type: Array,
-    default: () => []
-  },
-  // Format: ["eth0", ...]
-  interfaces: {
-    type: Array,
-    default: () => []
-  }
+  systemInterfaces: { type: Array, default: () => [] },
+  interfaces:       { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['changed'])
 
-// Format: ["eth0", ...]
-const newInterfaces = ref([])
-
-let syncing = false
+const newInterfaces = ref(Array.isArray(props.interfaces) ? [...props.interfaces] : [])
 
 const interfacesOptions = computed(() => {
   const map = new Map()
   for (const iface of props.systemInterfaces) {
-    if (iface && iface.name) {
-      map.set(iface.name, { ...iface })
-    }
+    if (iface && iface.name) map.set(iface.name, { ...iface })
   }
   for (const name of props.interfaces) {
-    if (name && !map.has(name)) {
-      map.set(name, { name, state: 'unknown' })
-    }
+    if (name && !map.has(name)) map.set(name, { name, state: 'unknown' })
   }
   return Array.from(map.values())
 })
 
-// Синхронизация с props.interfaces
+function toggleIface(name, checked) {
+  const set = new Set(newInterfaces.value)
+  if (checked) set.add(name)
+  else set.delete(name)
+  newInterfaces.value = Array.from(set)
+}
+
+// Синхронизация с props.interfaces (без эмита обратно)
 watch(
   () => props.interfaces,
   (val) => {
     const next = Array.isArray(val) ? [...val] : []
-    if (JSON.stringify(next) === JSON.stringify(newInterfaces.value)) return
-
-    syncing = true
+    if (
+      next.length === newInterfaces.value.length &&
+      next.every((v, i) => v === newInterfaces.value[i])
+    ) return
     newInterfaces.value = next
-    nextTick(() => {
-      syncing = false
-    })
   },
   { immediate: true }
 )
@@ -85,9 +70,22 @@ watch(
 watch(
   newInterfaces,
   (val) => {
-    if (syncing) return
+    if (!Array.isArray(val)) return
     emit('changed', [...val])
   },
   { deep: true }
 )
 </script>
+
+<style lang="scss">
+.iface-options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-height: 1050px;
+  gap: 20px;
+}
+
+.iface-option {
+}
+</style>

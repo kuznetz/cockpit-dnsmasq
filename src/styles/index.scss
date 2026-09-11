@@ -1,29 +1,6 @@
 /* Base files. */
-@forward "base/normalize";
-@forward "base/base-styles";
-@forward "base/utils";
-@forward "base/typography";
 @forward "base/flex";
 
 /* Modules */
 @forward "modules/main";
-@forward "modules/card";
-@forward "modules/buttons";
-@forward "modules/forms";
-@forward "modules/lists";
-@forward "modules/code";
 @forward "modules/tables";
-@forward "modules/tabs";
-@forward "modules/media-queries";
-
-.iface-options {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  max-height: 1050px;
-  gap: 10px;
-}
-
-.iface-option {
-  min-width: 150px;
-}

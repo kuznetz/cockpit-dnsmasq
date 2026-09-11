@@ -1,115 +1,117 @@
 <template>
   <div class="main-container">
-
-      <!-- Notification -->
-      <div 
-        v-if="notification" 
-        class="alert alert-success alert-dismissible notification"
-        :style="{ position: 'fixed', top: '20px', right: '20px', zIndex: '1000' }"
+    <!-- Notification (PatternFly Toast Alert Group / Alert) -->
+    <div 
+      v-if="notification" 
+      class="pf-v6-c-alert-group pf-m-toast"
+      :style="{ position: 'fixed', top: '20px', right: '20px', zIndex: '1000' }"
+    >
+      <pf-alert 
+        variant="success" 
+        title="Success" 
+        :is-inline="true"
+        @action-close="notification = null"
       >
-        <button 
-          type="button" 
-          class="close" 
-          @click="notification = null"
-        >
-          &times;
-        </button>
         {{ notification }}
-      </div>
+      </pf-alert>
+    </div>
       
-      <!-- Main Content -->
-      <div v-if="loaded">
+    <!-- Main Content -->
+    <div v-if="loaded">
+      <ParserWarnings v-if="parsedConf.parserWarnings?.length" :warnings="parsedConf.parserWarnings" />
 
-        <ParserWarnings v-if="parsedConf.parserWarnings?.length" :warnings="parsedConf.parserWarnings" />
-
-        <Tabs v-model="activeTab" :tabs="tabs" style="margin-bottom: 10px" />
-
-        <div class="">
+      <!-- PatternFly 6 Tabs -->
+      <pf-tabs v-model:active-key="activeTab" class="pf-v6-u-mb-md">
+        <pf-tab v-for="tab in tabs" :key="tab.name" :event-key="tab.name" :title="tab.label">
           
-          <div v-if="activeTab === 'network'">
-            <NetworkEditor @changed="parsedConf.interfaces = $event" :systemInterfaces="networks" :interfaces="parsedConf.interfaces" />
-            <!-- Action Buttons -->
-            <div style="text-align: center; padding: 10px">
-              <button @click="handleSave" class="primary-invert">
-                Save Configuration
-              </button>
-            </div>
-          </div>
-
-          <div v-else-if="activeTab === 'dhcp'">
-            <!-- ConfigEditor -->
-            <ConfigEditor ref="configEditorUi" :initial-config="parsedConf" />
-            <!-- Action Buttons -->
-            <div style="text-align: center; padding: 10px">
-              <button @click="handleSave" class="primary-invert">
-                Save Configuration
-              </button>
-            </div>
-          </div>
-
-          <div v-else-if="activeTab === 'hosts'">
-            <!-- DNS Leases -->
-            <div class="card" style="margin-bottom: 20px">
-              <div class="card-title">
-                DHCP Leases
-              </div>
-              <div class="card-body">
-                <DhcpTable v-if="leases" :data="leases" />
-              </div>
-              <div class="card-footer" style="text-align: center">
-                <button @click="loadLeases" class="btn btn-secondary">
-                  Refresh Leases
-                </button>
+          <!-- Content Padding via PatternFly Utilities -->
+          <div class="pf-v6-u-p-md">
+            
+            <div v-if="activeTab === 'network'">
+              <NetworkEditor @changed="parsedConf.interfaces = $event" :systemInterfaces="networks" :interfaces="parsedConf.interfaces" />
+              <!-- PF Action Buttons -->
+              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
+                <pf-button variant="primary" @click="handleSave">
+                  Save Configuration
+                </pf-button>
               </div>
             </div>
-            <!-- DHCP Hosts -->
-            <div class="card card-default" style="margin-bottom: 20px">
-              <div class="card-title">
-                DHCP Hosts
-              </div>
-              <div class="card-body">
-                <HostsTable
-                  :hosts="parsedConf.dhcpHosts" 
-                  :leases="leases" 
-                  @change="handleNewHosts"
-                  ref="hostsTableUi"
-                />
+
+            <div v-else-if="activeTab === 'dhcp'">
+              <ConfigEditor ref="configEditorUi" :initial-config="parsedConf" />
+              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
+                <pf-button variant="primary" @click="handleSave">
+                  Save Configuration
+                </pf-button>
               </div>
             </div>
-            <!-- Action Buttons -->
-            <div style="text-align: center; padding: 10px">
-              <button @click="handleSave" class="primary-invert">
-                Save Configuration
-              </button>
+
+            <div v-else-if="activeTab === 'hosts'">
+              <!-- PF Card: DHCP Leases -->
+              <pf-card class="pf-v6-u-mb-lg">
+                <pf-card-title>DHCP Leases</pf-card-title>
+                <pf-card-body>
+                  <DhcpTable v-if="leases" :data="leases" />
+                </pf-card-body>
+                <pf-card-footer class="pf-v6-u-text-align-center">
+                  <pf-button variant="secondary" @click="loadLeases">
+                    Refresh Leases
+                  </pf-button>
+                </pf-card-footer>
+              </pf-card>
+
+              <!-- PF Card: DHCP Hosts -->
+              <pf-card class="pf-v6-u-mb-lg">
+                <pf-card-title>DHCP Hosts</pf-card-title>
+                <pf-card-body>
+                  <HostsTable
+                    :hosts="parsedConf.dhcpHosts" 
+                    :leases="leases" 
+                    @change="handleNewHosts"
+                    ref="hostsTableUi"
+                  />
+                </pf-card-body>
+              </pf-card>
+              
+              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
+                <pf-button variant="primary" @click="handleSave">
+                  Save Configuration
+                </pf-button>
+              </div>
+            </div>
+            
+            <div v-else-if="activeTab === 'dns'">
+              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
+                <pf-button variant="primary" @click="handleSave">
+                  Save Configuration
+                </pf-button>
+              </div>
+            </div>
+
+            <div v-else-if="activeTab === 'service'">
+              <ServiceStatus />
             </div>
 
           </div>
-          
-          <div v-else-if="activeTab === 'dns'">
-
-            <!-- Action Buttons -->
-            <div style="text-align: center; padding: 10px">
-              <button @click="handleSave" class="primary-invert">
-                Save Configuration
-              </button>
-            </div>
-
-          </div>
-
-          <div v-else-if="activeTab === 'service'">
-            <ServiceStatus />
-          </div>
-
-        </div>
-
-      </div>
+        </pf-tab>
+      </pf-tabs>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 
-import Tabs from './ui/Tabs.vue'
+/*import { 
+  PfTabs, 
+  PfTab, 
+  PfButton, 
+  PfCard, 
+  PfCardTitle, 
+  PfCardBody, 
+  PfCardFooter, 
+  PfAlert 
+} from '@patternfly/vue-patternfly'*/
 
 import DhcpTable from './components/DhcpTable.vue'
 import HostsTable from './components/HostsTable.vue'
@@ -133,7 +135,7 @@ const configEditorUi = ref(null)
 const hostsTableUi = ref(null)
 const configPath = ref('/etc/dnsmasq.conf')
 
-const activeTab = ref('general')
+const activeTab = ref('network')
 
 const tabs = [
   { name: 'network', label: 'Network' },
@@ -180,26 +182,30 @@ const showNotification = (message) => {
 }
 
 const handleNewHosts = async (newHosts) => {
+  // Логика обработки изменений
 }
 
 const handleSave = async () => {
-  if (!configEditorUi.value.validateForm()) {
+  if (configEditorUi.value && !configEditorUi.value.validateForm()) {
     return
   }
-  let config = await configEditorUi.value.getConfig()
-  config.dhcpHosts = await hostsTableUi.value.getHosts()
-  //TODO: Remove from leases new hosts
+  
+  let config = configEditorUi.value ? await configEditorUi.value.getConfig() : { ...parsedConf.value }
+  
+  if (hostsTableUi.value) {
+    config.dhcpHosts = await hostsTableUi.value.getHosts()
+  }
+  
   let newText = DnsmasqConfigFormatter.format(config)
   try {
     await DnsmasqApi.saveConfig(configPath.value, newText)
-    await DnsmasqApi.reloadService();
+    await DnsmasqApi.reloadService()
     showNotification("Configuration saved successfully")
   } catch (error) {
     console.error("Failed to save configuration:", error)
   }
 }
 
-// Lifecycle
 onMounted(async () => {
   loaded.value = false
   try {

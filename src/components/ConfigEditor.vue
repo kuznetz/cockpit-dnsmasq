@@ -1,134 +1,136 @@
 <template>
-  <div>
-    <div class="flex-row" style="gap: 5px">
+  <div style="margin-bottom: 20px">
+    <div class="flex-row" style="gap: 20px; flex-wrap: wrap">
 
-        <!-- DHCP Range -->
-        <div class="card" style="margin-bottom: 10px">
-          <div class="card-title">DHCP Range</div>
-          <div class="card-body padding flex-column" style="gap: 16px">
-            <div class="flex-row" style="gap: 16px">
-              <div style="width: 150px">
-                <div class="form-group">
-                  <label for="dhcp-start-ip">Start IP</label>
-                  <input
-                    id="dhcp-start-ip"
-                    type="text"
-                    :value="config.dhcpRange.start"
-                    @input="handleDhcpRangeChange('start', $event.target.value)"
-                    placeholder="0.0.0.0"
-                    :class="{ 'error-input': errors.dhcpRangeStart }"
-                  />
-                  <div v-if="errors.dhcpRangeStart" class="error-text">{{ errors.dhcpRangeStart }}</div>
-                </div>
-              </div>
-              <div style="width: 150px">
-                <div class="form-group">
-                  <label for="dhcp-end-ip">End IP</label>
-                  <input
-                    id="dhcp-end-ip"
-                    type="text"
-                    :value="config.dhcpRange.end"
-                    @input="handleDhcpRangeChange('end', $event.target.value)"
-                    placeholder="0.0.0.0"
-                    :class="{ 'error-input': errors.dhcpRangeEnd }"
-                  />
-                  <div v-if="errors.dhcpRangeEnd" class="error-text">{{ errors.dhcpRangeEnd }}</div>
-                </div>
-              </div>
+      <!-- DHCP Range -->
+      <pf-card class="pf-v6-u-mb-md">
+        <pf-card-title>DHCP Range</pf-card-title>
+        <pf-card-body>
+          <pf-form>
+            <div class="flex-row" style="gap: 16px; flex-wrap: wrap">
+              <pf-form-control style="width: 150px">
+                <label for="dhcp-start-ip">Start IP</label>
+                <input
+                  id="dhcp-start-ip"
+                  type="text"
+                  :model-value="config.dhcpRange.start"
+                  @update:model-value="handleDhcpRangeChange('start', $event)"
+                  placeholder="0.0.0.0"
+                  :class="{ 'pf-m-error': errors.dhcpRangeStart }"
+                />
+                <pf-form-control-helper-text v-if="errors.dhcpRangeStart" variant="error">
+                  {{ errors.dhcpRangeStart }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
 
-              <div style="width: 150px">
-                <div class="form-group">
-                  <label for="dhcp-netmask">Netmask</label>
-                  <input
-                    id="dhcp-netmask"
-                    type="text"
-                    :value="config.dhcpRange.netmask"
-                    @input="handleDhcpRangeChange('netmask', $event.target.value)"
-                    placeholder="255.255.255.0"
-                    :class="{ 'error-input': errors.dhcpRangeNetmask }"
-                  />
-                  <div v-if="errors.dhcpRangeNetmask" class="error-text">{{ errors.dhcpRangeNetmask }}</div>
-                </div>
-              </div>
+              <pf-form-control style="width: 150px">
+                <label for="dhcp-end-ip">End IP</label>
+                <input
+                  id="dhcp-end-ip"
+                  type="text"
+                  :model-value="config.dhcpRange.end"
+                  @update:model-value="handleDhcpRangeChange('end', $event)"
+                  placeholder="0.0.0.0"
+                  :class="{ 'pf-m-error': errors.dhcpRangeEnd }"
+                />
+                <pf-form-control-helper-text v-if="errors.dhcpRangeEnd" variant="error">
+                  {{ errors.dhcpRangeEnd }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
 
-              <div style="width: 150px">
-                <div class="form-group">
-                  <label for="dhcp-gateway">Gateway</label>
-                  <input
-                    id="dhcp-gateway"
-                    type="text"
-                    :value="config.router"
-                    @input="config.router = $event.target.value"
-                    placeholder="0.0.0.0"
-                    :class="{ 'error-input': errors.dhcpRangeNetmask }"
-                  />
-                  <div v-if="errors.router" class="error-text">{{ errors.router }}</div>
-                </div>
-              </div>
-             
+              <pf-form-control style="width: 150px">
+                <label for="dhcp-netmask">Netmask</label>
+                <input
+                  id="dhcp-netmask"
+                  type="text"
+                  :model-value="config.dhcpRange.netmask"
+                  @update:model-value="handleDhcpRangeChange('netmask', $event)"
+                  placeholder="255.255.255.0"
+                  :class="{ 'pf-m-error': errors.dhcpRangeNetmask }"
+                />
+                <pf-form-control-helper-text v-if="errors.dhcpRangeNetmask" variant="error">
+                  {{ errors.dhcpRangeNetmask }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
+
+              <pf-form-control style="width: 150px">
+                <label for="dhcp-gateway">Gateway</label>
+                <input
+                  id="dhcp-gateway"
+                  type="text"
+                  :model-value="config.router"
+                  @update:model-value="config.router = $event"
+                  placeholder="0.0.0.0"
+                  :class="{ 'pf-m-error': errors.router }"
+                />
+                <pf-form-control-helper-text v-if="errors.router" variant="error">
+                  {{ errors.router }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
             </div>
 
-            <div class="flex-row" style="gap: 16px">
-
-              <div  style="width: 316px">
+            <div class="flex-row" style="gap: 16px; flex-wrap: wrap; margin-top: 16px">
+              <pf-form-control style="width: 316px">
                 <label for="domain-name">Domain Name</label>
                 <input
                   type="text"
                   id="domain-name"
-                  :value="config.domainName"
-                  @input="config.domainName = $event.target.value"
+                  :model-value="config.domainName"
+                  @update:model-value="config.domainName = $event"
                   placeholder="office.local"
                 />
-              </div>
+              </pf-form-control>
 
-              <div style="width: 150px">
-                <div class="form-group">
-                  <label for="dhcp-lease-time">Lease Time</label>
-                  <input
-                    id="dhcp-lease-time"
-                    type="text"
-                    :value="config.leaseTime"
-                    @input="config.leaseTime = $event.target.value"
-                    placeholder="24h"
-                    :class="{ 'error-input': errors.dhcpLeaseTime }"
-                  />
-                  <div v-if="errors.dhcpLeaseTime" class="error-text">{{ errors.dhcpLeaseTime }}</div>
-                </div>
-              </div>
+              <pf-form-control style="width: 150px">
+                <label for="dhcp-lease-time">Lease Time</label>
+                <input
+                  id="dhcp-lease-time"
+                  type="text"
+                  :model-value="config.leaseTime"
+                  @update:model-value="config.leaseTime = $event"
+                  placeholder="24h"
+                  :class="{ 'pf-m-error': errors.dhcpLeaseTime }"
+                />
+                <pf-form-control-helper-text v-if="errors.dhcpLeaseTime" variant="error">
+                  {{ errors.dhcpLeaseTime }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
 
-              <div style="width: 150px">
+              <pf-form-control style="width: 150px">
                 <label for="dhcp-lease-max">DHCP Lease Max</label>
                 <input
                   type="number"
                   id="dhcp-lease-max"
-                  :value="config.dhcpLeaseMax"
-                  @input="config.dhcpLeaseMax = parseInt($event.target.value) || 0"
+                  :model-value="config.dhcpLeaseMax"
+                  @update:model-value="config.dhcpLeaseMax = parseInt($event) || 0"
                   min="1"
                   max="10000"
-                  :class="{ 'error-input': errors.dhcpLeaseMax }"
+                  :class="{ 'pf-m-error': errors.dhcpLeaseMax }"
                 />
-                <div v-if="errors.dhcpLeaseMax" class="error-text">{{ errors.dhcpLeaseMax }}</div>
-              </div>
-              
+                <pf-form-control-helper-text v-if="errors.dhcpLeaseMax" variant="error">
+                  {{ errors.dhcpLeaseMax }}
+                </pf-form-control-helper-text>
+              </pf-form-control>
             </div>
-          </div>
-        </div>
+          </pf-form>
+        </pf-card-body>
+      </pf-card>
 
-        <!-- DNS Servers -->
-        <div class="card" style="width: 200px">
-          <div class="card-title">DNS Servers</div>
-          <div class="card-body padding">
-            <EditList ref="editDns" @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
-          </div>
-        </div>
+      <!-- DNS Servers -->
+      <pf-card style="width: 200px">
+        <pf-card-title>DNS Servers</pf-card-title>
+        <pf-card-body>
+          <EditList ref="editDns" @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
+        </pf-card-body>
+      </pf-card>
 
-        <!-- NTP Servers -->
-        <div class="card" style="width: 200px">
-          <div class="card-title">NTP Servers</div>
-          <div class="card-body padding">
-            <EditList ref="editNtp" @changed="config.ntpServers = $event" :items="config.ntpServers" placeholder="0.0.0.0" />
-          </div>
-        </div>
+      <!-- NTP Servers -->
+      <pf-card style="width: 200px">
+        <pf-card-title>NTP Servers</pf-card-title>
+        <pf-card-body>
+          <EditList ref="editNtp" @changed="config.ntpServers = $event" :items="config.ntpServers" placeholder="0.0.0.0" />
+        </pf-card-body>
+      </pf-card>
 
     </div>
   </div>
