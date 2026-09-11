@@ -129,7 +129,7 @@
         <tr v-if="editingIndex === null">
           <td :colspan="4">
             <PfSelect 
-              placeholder="Pre-fill with lease"
+              placeholder="Create or Pre-fill with lease"
               :options="leasesOptions"
               @change="(value) => addRow(value)"
             />

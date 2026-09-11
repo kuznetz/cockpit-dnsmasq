@@ -114,17 +114,6 @@
           </div>
         </div>
 
-    </div>
-    <div class="flex-row" style="gap: 5px">
-
-        <!-- Interfaces -->
-        <div class="card" style="width: 200px">
-          <div class="card-title">Interfaces</div>
-          <div class="card-body padding">
-            <EditList ref="editIfaces" @changed="config.interfaces = $event" :items="config.interfaces" placeholder="eth0" />
-          </div>
-        </div>
-
         <!-- DNS Servers -->
         <div class="card" style="width: 200px">
           <div class="card-title">DNS Servers</div>
@@ -175,7 +164,6 @@ const props = defineProps({
 
 const config = ref({ ...props.initialConfig })
 const errors = ref({})
-const editIfaces = ref(null)
 const editDns = ref(null)
 const editNtp = ref(null)
  
@@ -237,7 +225,6 @@ function validateForm() {
 }
 
 async function getConfig() {
-  editIfaces.value.save()
   editDns.value.save()
   editNtp.value.save()
   await nextTick()

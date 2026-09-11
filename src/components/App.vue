@@ -30,6 +30,12 @@
       <!-- Main Content -->
       <div v-if="loaded">
 
+        <ParserWarnings v-if="parsedConf.parserWarnings?.length" :warnings="parsedConf.parserWarnings" />
+
+        <NetworkEditor @changed="parsedConf.interfaces = $event" :systemInterfaces="networks" :interfaces="parsedConf.interfaces" />
+
+        <h3>DHCP</h3>
+
         <!-- DNS Leases -->
         <div class="card" style="margin-bottom: 20px">
           <div class="card-title">
@@ -44,27 +50,7 @@
             </button>
           </div>
         </div>
-        
-        <h3>Configuration Editor</h3>
 
-        <div style="margin-bottom: 10px;">
-          <div class="form-group">
-            <label for="config-path">Config path:</label>
-            <input
-              id="config-path"
-              type="text"
-              :value="configPath"
-              @input="configPath = $event.target.value"
-              placeholder=""
-            />
-          </div>
-            <div style="text-align: center; margin-top: 5px">
-              <button @click="loadConfig()" class="btn btn-secondary">
-                Reload config
-              </button>
-            </div>
-        </div>
-        
         <!-- DHCP Hosts -->
         <div class="card card-default" style="margin-bottom: 20px">
           <div class="card-title">
@@ -80,11 +66,7 @@
           </div>
         </div>
 
-        <!-- Config Editor -->
-        <ConfigEditor 
-          ref="configEditorUi"
-          :initial-config="parsedConf" 
-        />
+        <ConfigEditor ref="configEditorUi" :initial-config="parsedConf" />
 
         <!-- Action Buttons -->
         <div style="text-align: center; padding: 10px">
@@ -102,8 +84,10 @@ import { ref, onMounted, watch } from 'vue'
 
 import DhcpTable from './DhcpTable.vue'
 import HostsTable from './HostsTable.vue'
+import NetworkEditor from './NetworkEditor.vue'
 import ConfigEditor from './ConfigEditor.vue'
 import ServiceStatus from './ServiceStatus.vue'
+import ParserWarnings from './ParserWarnings.vue'
 
 import DnsmasqApi from 'dnsmasq-api'
 import DnsmasqConfigParser from '../model/config-parser.js'
@@ -114,6 +98,7 @@ const loaded = ref(false)
 const configText = ref(null)
 const parsedConf = ref(null)
 const leases = ref(null)
+const networks = ref(null)
 const notification = ref(null)
 const configEditorUi = ref(null)
 const hostsTableUi = ref(null)
@@ -137,6 +122,14 @@ const loadLeases = async () => {
     leases.value = await DnsmasqApi.readLeases()
   } catch (error) {
     leases.value = "Error reading leases: " + error
+  }
+}
+
+const loadNetworks = async () => {
+  try {
+    networks.value = await DnsmasqApi.readNetworks()
+  } catch (error) {
+    showNotification("Error reading Network Interfaces: " + error)
   }
 }
 
@@ -173,7 +166,7 @@ onMounted(async () => {
   try {
     await DnsmasqApi.init()
     configPath.value = await DnsmasqApi.getConfigPath()
-    await Promise.all([loadConfig(), loadLeases()])
+    await Promise.all([loadConfig(), loadLeases(), loadNetworks()])
     loaded.value = true
   } catch (error) {
     console.error("Failed to initialize application: " + error.message)

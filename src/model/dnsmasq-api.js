@@ -96,6 +96,46 @@ class DnsmasqApi {
   static async readLogs() {
     return cockpit.spawn(["journalctl", "-u", "dnsmasq", "--since", "1 hour ago", "--no-pager"]);
   }
+
+  static async readNetworks() {
+      const SYS_NET = "/sys/class/net";
+
+      // Get list of interface names
+      const dir = cockpit.file(SYS_NET, { superuser: "try" });
+      let names;
+      try {
+          names = await dir.read();
+      } catch (e) {
+          return [];
+      }
+
+      // If cockpit.file can't read directories — use ls via spawn
+      if (!Array.isArray(names)) {
+          const proc = cockpit.spawn(["ls", "-1", SYS_NET],
+                                    { superuser: "try", err: "message" });
+          const out = await proc;
+          names = out.trim().split("\n").filter(Boolean);
+      }
+
+      const interfaces = [];
+
+      for (const name of names.sort()) {
+          if (name === "lo") continue;
+
+          // Read operstate
+          let state = "unknown";
+          try {
+              const st = await cockpit.file(`${SYS_NET}/${name}/operstate`,
+                                            { superuser: "try" }).read();
+              state = (st || "").trim();
+          } catch (_) { /* ignore */ }
+
+          interfaces.push({ name, state });
+      }
+
+      return interfaces;
+  }
+
 }
 
 export default DnsmasqApi;
