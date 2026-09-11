@@ -7,20 +7,27 @@ html {
 
   --color: #151515;
   --background: #fff;
+  --hover-background: #e6e6e6;
   --border-color: #c7c7c7;
   --primary-color: #0066cc;
   --primary-color-active: #004d99;
+  --danger-color: #b1380b;
+  --danger-color-active: #8f2b08;
+
 }
 
 .theme-dark {
-  --main-background: #151515;
+  --main-background: #1f1f1f;
   --main-border-color: #151515;
 
   --color: #e6e6e6;
   --background: #292929;
+  --hover-background: #3d3d3d;
   --border-color: #a3a3a3;
   --primary-color: #b9dafc;
   --primary-color-active: #e0f0ff;
+  --danger-color: #f0917e;
+  --danger-color-active: #f9c5b8;
 }
 
 // Breakpoints
