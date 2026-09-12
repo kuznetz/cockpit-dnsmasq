@@ -105,7 +105,3 @@ dhcp-lease-max=150`
 }
 
 export default DnsmasqApi;
-
-/*
-Create js parser for /etc/dnsmasq.conf, group result by interface, parser must support this configs:
-

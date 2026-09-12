@@ -1,9 +1,35 @@
 import DnsmasqLeasesParser from './leases-parser.js';
-import cockpit from 'cockpit';
+
+let cockpit = null
 
 class DnsmasqApi {
 
+  static async loadCockpit() {
+    if (window.cockpit) {
+      return window.cockpit;
+    }
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = new URL('../base1/cockpit.js', document.baseURI).href;
+      script.async = true;
+
+      script.onload = () => {
+        if (window.cockpit) {
+          resolve(window.cockpit);
+        } else {
+          reject(new Error('cockpit.js загружен, но объект cockpit не найден'));
+        }
+      };
+
+      script.onerror = () => reject(new Error('Не удалось загрузить cockpit.js'));
+
+      document.head.appendChild(script);
+    });
+  }  
+
   static async init() {
+    cockpit = await DnsmasqApi.loadCockpit();
     console.log('DnsmasqApi init',cockpit)
   }
   

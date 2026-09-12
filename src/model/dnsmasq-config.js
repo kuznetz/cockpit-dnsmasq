@@ -40,7 +40,6 @@ export default class DnsmasqConfig {
       domainNeeded: false,
       bogusPriv: false,
       expandHosts: false,
-      domain: null,
       local: [],
       addresses: [],
       hostRecords: [],

@@ -222,7 +222,6 @@ class DnsmasqConfigParser {
         // и формирования FQDN.
         case 'domain':
           this.config.domain = value;
-          this.config.dns.domain = value;
           break;
 
         // no-resolv — не читать /etc/resolv.conf для получения вышестоящих DNS-серверов.

@@ -22,7 +22,7 @@
 
       <!-- PatternFly 6 Tabs -->
       <pf-tabs v-model:active-key="activeTab" class="pf-v6-u-mb-md">
-        <pf-tab v-for="tab in tabs" :key="tab.name" :event-key="tab.name" :title="tab.label">
+      <pf-tab v-for="tab in tabs" :key="tab.name" :event-key="tab.name" :title="tab.label">
           
           <!-- Content Padding via PatternFly Utilities -->
           <div class="pf-v6-u-p-md">
@@ -38,7 +38,7 @@
             </div>
 
             <div v-else-if="activeTab === 'dhcpv4'">
-              <Dhcpv4Editor ref="configEditorUi" :initial-config="parsedConf" />
+              <Dhcpv4Editor ref="dhcpv4Editor" :initial-config="parsedConf" />
               <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
                 <pf-button variant="primary" @click="handleSave">
                   Save Configuration
@@ -69,8 +69,18 @@
               </pf-card>
 
             </div>
+
+            <div v-else-if="activeTab === 'dhcpv6'">
+              <Dhcpv6Editor :initial-config="parsedConf" />
+              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
+                <pf-button variant="primary" @click="handleSave">
+                  Save Configuration
+                </pf-button>
+              </div>
+            </div>            
             
             <div v-else-if="activeTab === 'dns'">
+              <DnsEditor ref="dnsEditor" :initial-config="parsedConf" />
               <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
                 <pf-button variant="primary" @click="handleSave">
                   Save Configuration
@@ -107,6 +117,8 @@ import DhcpLeasesTable from './components/DhcpLeasesTable.vue'
 import HostsTable from './components/HostsTable.vue'
 import NetworkEditor from './components/NetworkEditor.vue'
 import Dhcpv4Editor from './components/Dhcpv4Editor.vue'
+import Dhcpv6Editor from './components/Dhcpv6Editor.vue'
+import DnsEditor from './components/DnsEditor.vue'
 import ServiceStatus from './components/ServiceStatus.vue'
 import ParserWarnings from './components/ParserWarnings.vue'
 
@@ -122,8 +134,9 @@ const parsedConf = ref(null)
 const leases = ref(null)
 const networks = ref(null)
 const notification = ref(null)
-const configEditorUi = ref(null)
+const dhcpv4Editor = ref(null)
 const hostsTableUi = ref(null)
+const dnsEditor = ref(null)
 const configPath = ref('/etc/dnsmasq.conf')
 
 const activeTab = ref('network')
@@ -131,6 +144,7 @@ const activeTab = ref('network')
 const tabs = [
   { name: 'network', label: 'Network' },
   { name: 'dhcpv4', label: 'DHCPv4' },
+  { name: 'dhcpv6', label: 'DHCPv6/RA' },
   { name: 'hosts', label: 'DHCP hosts' },
   { name: 'dns',  label: 'DNS' },
   { name: 'service',  label: 'Service' },
@@ -184,16 +198,24 @@ const handleLeaseRemove = async (lease) => {
 }
 
 const handleSave = async () => {
-  if (configEditorUi.value && !configEditorUi.value.validateForm()) {
+  if (dhcpv4Editor.value && !dhcpv4Editor.value.validateForm()) {
+    return
+  }
+  if (dnsEditor.value && !dnsEditor.value.validateForm()) {
     return
   }
   
-  let config = configEditorUi.value ? await configEditorUi.value.getConfig() : { ...parsedConf.value }
+  let config = dhcpv4Editor.value ? await dhcpv4Editor.value.getConfig() : { ...parsedConf.value }
+  
+  if (dnsEditor.value) {
+    const dnsConfig = await dnsEditor.value.getConfig()
+    config.dns = dnsConfig.dns
+  }
   
   if (hostsTableUi.value) {
     config.dhcpv4.dhcpHosts = await hostsTableUi.value.getHosts()
   }
-  
+
   let newText = DnsmasqConfigFormatter.format(config)
   try {
     await DnsmasqApi.saveConfig(configPath.value, newText)
@@ -216,6 +238,4 @@ onMounted(async () => {
   }
 })
 </script>
-
-
 
