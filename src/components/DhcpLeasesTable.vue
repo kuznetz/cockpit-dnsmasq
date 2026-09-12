@@ -48,7 +48,8 @@
 <script setup>
 import DeleteSvg from '@/svg/trash-solid-full.svg'
 import VSvg from '../ui/VSvg.vue';
-import { defineProps } from 'vue';
+import DnsmasqApi from 'dnsmasq-api';
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
   data: {
@@ -58,13 +59,22 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['remove']);
+
 // Function to format timestamp to readable date
 const formatTimestamp = (timestamp) => {
   return new Date(timestamp * 1000).toLocaleString();
 };
 
 // Function to remove row
-const removeRow = (index) => {
-  alert('removeRow ' + index);
+const removeRow = async (index) => {
+  const lease = props.data[index];
+  try {
+    await DnsmasqApi.removeLease(lease.mac);
+    emit('remove', lease);
+  } catch (error) {
+    console.error('Failed to remove lease:', error);
+  }
 };
 </script>
+

@@ -48,16 +48,11 @@
 
             <div v-else-if="activeTab === 'hosts'">
               <!-- PF Card: DHCP Leases -->
-              <pf-card class="pf-v6-u-mb-lg">
+              <pf-card v-if="leases" class="pf-v6-u-mb-lg">
                 <pf-card-title>DHCP Leases</pf-card-title>
                 <pf-card-body>
-                  <DhcpTable v-if="leases" :data="leases" />
+                  <DhcpLeasesTable :data="leases" @remove="handleLeaseRemove" />
                 </pf-card-body>
-                <pf-card-footer class="pf-v6-u-text-align-center">
-                  <pf-button variant="secondary" @click="loadLeases">
-                    Refresh Leases
-                  </pf-button>
-                </pf-card-footer>
               </pf-card>
 
               <!-- PF Card: DHCP Hosts -->
@@ -65,19 +60,14 @@
                 <pf-card-title>DHCP Hosts</pf-card-title>
                 <pf-card-body>
                   <HostsTable
-                    :hosts="parsedConf.dhcpHosts" 
+                    :hosts="parsedConf.dhcpv4.dhcpHosts" 
                     :leases="leases" 
-                    @change="handleNewHosts"
+                    @change="handleSave"
                     ref="hostsTableUi"
                   />
                 </pf-card-body>
               </pf-card>
-              
-              <div class="pf-v6-u-text-align-center pf-v6-u-p-md">
-                <pf-button variant="primary" @click="handleSave">
-                  Save Configuration
-                </pf-button>
-              </div>
+
             </div>
             
             <div v-else-if="activeTab === 'dns'">
@@ -113,7 +103,7 @@ import { ref, onMounted } from 'vue'
   PfAlert 
 } from '@patternfly/vue-patternfly'*/
 
-import DhcpTable from './components/DhcpTable.vue'
+import DhcpLeasesTable from './components/DhcpLeasesTable.vue'
 import HostsTable from './components/HostsTable.vue'
 import NetworkEditor from './components/NetworkEditor.vue'
 import Dhcpv4Editor from './components/Dhcpv4Editor.vue'
@@ -121,6 +111,7 @@ import ServiceStatus from './components/ServiceStatus.vue'
 import ParserWarnings from './components/ParserWarnings.vue'
 
 import DnsmasqApi from 'dnsmasq-api'
+import DnsmasqConfig from './model/config-parser.js'
 import DnsmasqConfigParser from './model/config-parser.js'
 import DnsmasqConfigFormatter from './model/config-formatter.js'
 
@@ -147,15 +138,17 @@ const tabs = [
 
 // Methods
 const loadConfig = async () => {
+  configText.value = ''
+  let dnsmasqConf = null
   try {
     const content = await DnsmasqApi.readConfig(configPath.value)
-    const hosts = DnsmasqConfigParser.parse(content)
-    parsedConf.value = hosts
     configText.value = content
-    console.log('loadConfig', hosts, content)
+    dnsmasqConf = DnsmasqConfigParser.parse(content)
   } catch (error) {
-    configText.value = "Error reading configuration: " + error
+    dnsmasqConf = new DnsmasqConfig()
   }
+  parsedConf.value = dnsmasqConf
+  console.log('loadConfig', dnsmasqConf)
 }
 
 const loadLeases = async () => {
@@ -185,6 +178,11 @@ const handleNewHosts = async (newHosts) => {
   // Логика обработки изменений
 }
 
+const handleLeaseRemove = async (lease) => {
+  leases.value = leases.value.filter(l => l.mac !== lease.mac)
+  showNotification(`Lease ${lease.mac} removed`)
+}
+
 const handleSave = async () => {
   if (configEditorUi.value && !configEditorUi.value.validateForm()) {
     return
@@ -193,7 +191,7 @@ const handleSave = async () => {
   let config = configEditorUi.value ? await configEditorUi.value.getConfig() : { ...parsedConf.value }
   
   if (hostsTableUi.value) {
-    config.dhcpHosts = await hostsTableUi.value.getHosts()
+    config.dhcpv4.dhcpHosts = await hostsTableUi.value.getHosts()
   }
   
   let newText = DnsmasqConfigFormatter.format(config)
@@ -218,3 +216,6 @@ onMounted(async () => {
   }
 })
 </script>
+
+
+

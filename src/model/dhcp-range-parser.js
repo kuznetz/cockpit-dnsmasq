@@ -198,6 +198,92 @@ function parseIPv6Range(tokens) {
   return r;
 }
 
+// ---------- IPv6 (dnsmasq dhcpv6) ----------
+
+/**
+ * Определяет, относится ли значение dhcp-range к IPv6/DHCPv6/RA.
+ * Перенесено из DnsmasqConfigParser._isIPv6Range.
+ */
+export function isIPv6Range(value) {
+  return /(^|[,\s])(::|([0-9a-f]{0,4}:){2,}[0-9a-f]{0,4})([,\s]|$)/i.test(value)
+    || /constructor:/.test(value)
+    || /(^|,)(ra-stateless|ra-names|ra-only|slaac|dhcpv6|stateful)(,|$)/.test(value);
+}
+
+/**
+ * Разбирает значение dhcp-range в объект для config.dhcpv6.
+ * Перенесено из DnsmasqConfigParser._parseDhcpv6Range (+ _detectDhcpv6Mode).
+ *
+ * @returns {{
+ *   start: string|null,
+ *   end: string|null,
+ *   constructor: string|null,
+ *   prefixLength: number|null,
+ *   mode: string|null,
+ *   leaseTime: string|null
+ * }}
+ */
+export function parseIPv6(value) {
+  const result = {
+    start: null,
+    end: null,
+    constructor: null,
+    prefixLength: null,
+    mode: null,
+    leaseTime: null,
+  };
+
+  const parts = value.split(',').map(p => p.trim()).filter(Boolean);
+  const ipv6Parts = [];
+  const isTime = p => /^\d+(s|m|h|d|w)?$/i.test(p);
+  const isPrefix = p => /^\d+$/.test(p) && Number(p) <= 128;
+  const isIPv6 = p => p.includes(':') || p === '::';
+
+  for (const part of parts) {
+    if (part.startsWith('constructor:')) {
+      result.constructor = part.slice('constructor:'.length);
+    } else if (['ra-stateless', 'ra-names', 'ra-only', 'slaac', 'dhcpv6', 'stateful'].includes(part)) {
+      result.mode = part;
+    } else if (isIPv6(part)) {
+      ipv6Parts.push(part);
+    } else if (isPrefix(part)) {
+      result.prefixLength = Number(part);
+    } else if (isTime(part)) {
+      result.leaseTime = part;
+    }
+  }
+
+  result.start = ipv6Parts[0] || null;
+  result.end = ipv6Parts[1] || null;
+  result.mode = detectDhcpv6Mode(result);
+
+  return result;
+}
+
+/**
+ * Определяет режим DHCPv6/RA.
+ * Перенесено из DnsmasqConfigParser._detectDhcpv6Mode.
+ */
+export function detectDhcpv6Mode(dhcpv6) {
+  const rawMode = (dhcpv6.mode || '').toLowerCase();
+  const allowedModes = new Set([
+    'ra-stateless',
+    'ra-names',
+    'slaac',
+    'ra-only',
+    'stateful',
+    'dhcpv6',
+  ]);
+
+  if (allowedModes.has(rawMode)) {
+    return rawMode;
+  }
+  if (dhcpv6.start && (dhcpv6.end || dhcpv6.prefixLength || dhcpv6.constructor)) {
+    return 'stateful';
+  }
+  return null;
+}
+
 // ---------- public API ----------
 
 export function parse(value) {
@@ -212,48 +298,6 @@ export function parse(value) {
     );
 
   return ipv6 ? parseIPv6Range(tokens) : parseIPv4Range(tokens);
-}
-
-export function format(c) {
-  const parts = [];
-
-  if (c.networkId) parts.push(c.networkId);
-  parts.push(c.start, c.end);
-
-  if (c.type === 'ipv4') {
-    [c.netmask, c.broadcast, c.router, c.leaseTime]
-      .forEach(v => v && parts.push(v));
-
-    c.options.forEach(o => parts.push(`option:${o}`));
-    c.tags.forEach(t => parts.push(`tag:${t}`));
-    c.classes.forEach(cl => parts.push(`class:${cl}`));
-
-    if (c.mode !== 'dynamic') parts.push(c.mode);
-
-    Object.entries(c.settings).forEach(([k, v]) => {
-      parts.push(v === true ? `set:${k}` : `set:${k}=${v}`);
-    });
-
-    c.staticBindings.forEach(b => parts.push(b));
-  } else {
-    if (c.prefix) parts.push(c.prefix);
-    if (c.mode !== 'dynamic') parts.push(c.mode);
-    if (c.leaseTime) parts.push(c.leaseTime);
-    if (c.temporary) parts.push('temporary');
-    if (c.deprecated) parts.push('deprecated');
-    if (c.raOnly) parts.push('ra-only');
-
-    c.flags.forEach(f => {
-      if (
-        f !== c.mode &&
-        !['temporary', 'deprecated', 'ra-only'].includes(f)
-      ) {
-        parts.push(f);
-      }
-    });
-  }
-
-  return `dhcp-range=${parts.join(',')}`;
 }
 
 export function validate(c) {

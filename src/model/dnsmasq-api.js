@@ -92,9 +92,22 @@ class DnsmasqApi {
     return result
   }
 
-  // Log operations
-  static async readLogs() {
-    return cockpit.spawn(["journalctl", "-u", "dnsmasq", "--since", "1 hour ago", "--no-pager"]);
+  static async removeLease(mac) {
+    const leaseFile = "/var/lib/misc/dnsmasq.leases";
+    const content = await cockpit.file(leaseFile, { superuser: "require" }).read();
+    if (content === null) {
+      throw new Error(`Lease file not found: ${leaseFile}`);
+    }
+    const lines = content.trim().split('\n');
+    const filtered = lines.filter(line => {
+      const parts = line.trim().split(/\s+/);
+      return parts[1] !== mac;
+    });
+    if (filtered.length === lines.length) {
+      throw new Error(`Lease with MAC ${mac} not found`);
+    }
+    await cockpit.file(leaseFile, { superuser: "require" }).replace(filtered.join('\n') + '\n');
+    console.log(`Lease with MAC ${mac} removed`);
   }
 
   static async readNetworks() {

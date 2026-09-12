@@ -1,185 +1,177 @@
-import DhcpRangeParser from "./dhcp-range-parser.js";
+import DnsmasqConfig from './dnsmasq-config.js'
 
 class DnsmasqConfigFormatter {
   constructor() {
-    this.indentation = "  ";
     this.lineEnding = "\n";
   }
 
+  /**
+   * 
+   * @param {DnsmasqConfig} config 
+   * @returns {String}
+   */
   static format(config) {
     const formatter = new DnsmasqConfigFormatter();
     return formatter.formatConfig(config);
   }
 
   formatConfig(config) {
-    let lines = [];
+    const c = config || {};
+    const dns = c.dns || {};
+    const v4 = c.dhcpv4 || {};
+    const v6 = c.dhcpv6 || {};
 
-    lines.push(`port=0 #disable dns`);
-    lines.push(''); // Empty line for separation
+    const lines = [];
 
-    // Format interfaces
-    if (config.interfaces && config.interfaces.length > 0) {
-      for (const iface of config.interfaces) {
-        lines.push(`interface=${iface}`);
-      }
-      lines.push('');
-    }
-
-    // Format DHCP range
-    if (config.dhcpRange) {
-      const rangeLine = this.formatDhcpRange(config.dhcpRange, config.leaseTime);
-      if (rangeLine) {
-        lines.push(rangeLine);
-        lines.push('');
+    // ---- interfaces / bind ----
+    if (Array.isArray(c.interfaces)) {
+      for (const iface of c.interfaces) {
+        if (iface) lines.push(`interface=${iface}`);
       }
     }
+    if (c.bind === 'interfaces') lines.push('bind-interfaces');
+    else if (c.bind === 'dynamic') lines.push('bind-dynamic');
 
-    // Format DHCP options
-    const dhcpOptionLines = this.formatDhcpOptions(config);
-    if (dhcpOptionLines.length > 0) {
-      lines.push(...dhcpOptionLines);
-      lines.push('');
+    // ---- DHCPv4 ----
+    const v4Range = this._formatDhcpv4Range(v4);
+    if (v4Range) lines.push(v4Range);
+
+    if (v4.router) {
+      lines.push(`dhcp-option=option:router,${v4.router}`);
     }
-
-    // Format DHCP hosts
-    if (config.dhcpHosts && config.dhcpHosts.length > 0) {
-      const hostLines = this.formatDhcpHosts(config.dhcpHosts);
-      if (hostLines.length > 0) {
-        lines.push(...hostLines);
-        lines.push('');
+    if (Array.isArray(v4.dnsServers) && v4.dnsServers.length > 0) {
+      lines.push(`dhcp-option=option:dns-server,${v4.dnsServers.join(',')}`);
+    }
+    if (Array.isArray(v4.ntpServers) && v4.ntpServers.length > 0) {
+      lines.push(`dhcp-option=option:ntp-server,${v4.ntpServers.join(',')}`);
+    }
+    if (Array.isArray(v4.dhcpHosts)) {
+      for (const host of v4.dhcpHosts) {
+        const line = this._formatDhcpHost(host);
+        if (line) lines.push(line);
       }
     }
 
-    // Format DHCP lease max
-    if (config.dhcpLeaseMax) {
-      lines.push(`dhcp-lease-max=${config.dhcpLeaseMax}`);
+    // ---- DHCPv6 / RA ----
+    const v6Range = this._formatDhcpv6Range(v6);
+    if (v6Range) lines.push(v6Range);
+
+    if (Array.isArray(v6.dnsServers) && v6.dnsServers.length > 0) {
+      lines.push(`dhcp-option=option6:dns-server,${v6.dnsServers.join(',')}`);
+    }
+    if (Array.isArray(v6.ntpServers) && v6.ntpServers.length > 0) {
+      lines.push(`dhcp-option=option6:ntp-server,${v6.ntpServers.join(',')}`);
+    }
+    if (Array.isArray(v6.dhcpHosts)) {
+      for (const host of v6.dhcpHosts) {
+        const line = this._formatDhcpHost(host);
+        if (line) lines.push(line);
+      }
     }
 
-    return lines.join(this.lineEnding).trim() + this.lineEnding;
+    // ---- DHCP lease max ----
+    if (c.dhcpLeaseMax != null && c.dhcpLeaseMax !== '') {
+      lines.push(`dhcp-lease-max=${c.dhcpLeaseMax}`);
+    }
+
+    // ---- DNS ----
+    const domain = c.domain || dns.domain;
+    if (domain) lines.push(`domain=${domain}`);
+
+    if (dns.noResolv) lines.push('no-resolv');
+    if (dns.noHosts) lines.push('no-hosts');
+    if (dns.domainNeeded) lines.push('domain-needed');
+    if (dns.bogusPriv) lines.push('bogus-priv');
+    if (dns.expandHosts) lines.push('expand-hosts');
+    if (dns.cacheSize != null && dns.cacheSize !== '') {
+      lines.push(`cache-size=${dns.cacheSize}`);
+    }
+
+    if (Array.isArray(dns.servers)) {
+      for (const s of dns.servers) if (s) lines.push(`server=${s}`);
+    }
+    if (Array.isArray(dns.addresses)) {
+      for (const a of dns.addresses) if (a) lines.push(`address=${a}`);
+    }
+    if (Array.isArray(dns.local)) {
+      for (const l of dns.local) if (l) lines.push(`local=${l}`);
+    }
+    if (Array.isArray(dns.listenAddresses)) {
+      for (const la of dns.listenAddresses) if (la) lines.push(`listen-address=${la}`);
+    }
+    if (Array.isArray(dns.interfaceNames)) {
+      for (const n of dns.interfaceNames) if (n) lines.push(`interface-name=${n}`);
+    }
+    if (Array.isArray(dns.addnHosts)) {
+      for (const f of dns.addnHosts) if (f) lines.push(`addn-hosts=${f}`);
+    }
+    if (Array.isArray(dns.hostRecords)) {
+      for (const r of dns.hostRecords) if (r) lines.push(`host-record=${r}`);
+    }
+    if (Array.isArray(dns.cnames)) {
+      for (const cn of dns.cnames) if (cn) lines.push(`cname=${cn}`);
+    }
+
+    if (lines.length === 0) return '';
+
+    return lines.join(this.lineEnding) + this.lineEnding;
   }
 
-  formatDhcpRange(dhcpRange, leaseTime=null) {
-    if (!dhcpRange) return '';
+  // ---- private helpers ----
+
+  _formatDhcpv4Range(v4) {
+    if (!v4 || !v4.enabled) return null;
+    if (!v4.start && !v4.end) return null;
+
     const parts = [];
-    if (dhcpRange.start) {
-      parts.push(dhcpRange.start);
+    if (v4.start) parts.push(v4.start);
+    if (v4.end) parts.push(v4.end);
+
+    if (v4.netmask) {
+      parts.push(v4.netmask);
+    } else if (v4.prefixLength != null && v4.prefixLength !== '') {
+      parts.push(String(v4.prefixLength));
     }
-    if (dhcpRange.end) {
-      parts.push(dhcpRange.end);
-    }
-    if (dhcpRange.netmask) {
-      parts.push(dhcpRange.netmask);
-    }
-    if (leaseTime) {
-      parts.push(leaseTime);
-    }
+
+    if (v4.broadcast) parts.push(v4.broadcast);
+    if (v4.leaseTime) parts.push(v4.leaseTime);
+
     return `dhcp-range=${parts.join(',')}`;
   }
 
-  formatDhcpOptions(config) {
-    const lines = [];    
-    // Lease Time (Option 2)
-    // if (config.leaseTime) {
-    //   lines.push(`dhcp-option=2,${config.leaseTime}`);
-    // }
-    // Router/Gateway (Option 3)
-    if (config.router) {
-      lines.push(`dhcp-option=option:router,${config.router}`);
-    }    
-    // DNS Servers (Option 6)
-    if (config.dnsServers && config.dnsServers.length > 0) {
-      lines.push(`dhcp-option=option:dns-server,${config.dnsServers.join(',')}`);
-    }    
-    // Domain Name (Option 15)
-    if (config.domainName) {
-      lines.push(`dhcp-option=option:domain-name,${config.domainName}`);
-    }    
-    // Broadcast Address (Option 28)
-    // if (config.broadcast) {
-    //   lines.push(`dhcp-option=option:broadcast,${config.broadcast}`);
-    // }
-    // NTP Servers (Option 42)
-    if (config.ntpServers && config.ntpServers.length > 0) {
-      lines.push(`dhcp-option=option:ntp-server,${config.ntpServers.join(',')}`);
-    }    
-    return lines;
-  }
+  _formatDhcpv6Range(v6) {
+    if (!v6) return null;
 
-  formatDhcpHosts(dhcpHosts) {
-    const lines = [];
-    
-    for (const host of dhcpHosts) {
-      const parts = [];
-      
-      // MAC address (required)
-      if (host.mac) {
-        parts.push(host.mac);
-      }
-      
-      // IP address (optional for some configurations)
-      if (host.ip) {
-        parts.push(host.ip);
-      }
-      
-      // Hostname (optional)
-      if (host.hostname) {
-        parts.push(host.hostname);
-      }
-      
-      // Lease time (optional)
-      if (host.leaseTime) {
-        parts.push(host.leaseTime);
-      }
-      
-      let line = `dhcp-host=${parts.join(',')}`;
-      
-      // Add comment if present
-      if (host.comment) {
-        line += ` # ${host.comment}`;
-      }
-      
-      lines.push(line);
+    const hasMode = Array.isArray(v6.mode) && v6.mode.length > 0;
+    if (!hasMode && !v6.start && !v6.constr && v6.prefixLength == null && !v6.leaseTime) {
+      return null;
     }
-    
-    return lines;
-  }
 
-  // Helper method to create a complete config from scratch
-  static createConfig(options = {}) {
-    const defaultConfig = {
-      interfaces: [],
-      dhcpRange: null,
-      router: null,
-      dnsServers: [],
-      domainName: null,
-      //broadcast: null,
-      ntpServers: [],
-      dhcpHosts: [],
-      leaseTime: null,
-      dhcpLeaseMax: null
-    };
-    
-    return { ...defaultConfig, ...options };
-  }
-
-  // Method to update an existing config
-  static updateConfig(existingConfig, updates) {
-    const updatedConfig = { ...existingConfig };
-    
-    for (const [key, value] of Object.entries(updates)) {
-      if (key in updatedConfig) {
-        if (Array.isArray(value)) {
-          // For arrays, we can either replace or merge based on needs
-          updatedConfig[key] = [...value];
-        } else if (value && typeof value === 'object') {
-          updatedConfig[key] = { ...updatedConfig[key], ...value };
-        } else {
-          updatedConfig[key] = value;
-        }
-      }
+    const parts = [];
+    if (v6.start) parts.push(v6.start);
+    if (v6.end) parts.push(v6.end);
+    if (v6.constr) parts.push(`constructor:${v6.constr}`);
+    if (hasMode) parts.push(...v6.mode);
+    if (v6.prefixLength != null && v6.prefixLength !== '') {
+      parts.push(String(v6.prefixLength));
     }
-    
-    return updatedConfig;
+    if (v6.leaseTime) parts.push(v6.leaseTime);
+
+    return `dhcp-range=${parts.join(',')}`;
+  }
+
+  _formatDhcpHost(host) {
+    if (!host) return null;
+    const parts = [];
+    if (host.mac) parts.push(host.mac);
+    if (host.ip) parts.push(host.ip);
+    if (host.hostname) parts.push(host.hostname);
+    if (host.leaseTime) parts.push(host.leaseTime);
+    if (parts.length === 0) return null;
+
+    let line = `dhcp-host=${parts.join(',')}`;
+    if (host.comment) line += ` # ${host.comment}`;
+    return line;
   }
 }
 

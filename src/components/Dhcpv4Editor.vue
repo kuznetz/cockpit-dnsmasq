@@ -2,10 +2,10 @@
   <div style="margin-bottom: 20px">
 
     <div style="margin-bottom: 20px">
-      <pf-switch v-model:checked="config.dhcpEnabled" label="Enable DHCPv4" />
-    </div>
+      <pf-switch v-model:checked="config.dhcpv4.enabled" label="Enable DHCPv4" />
+          </div>
 
-    <div v-if="config.dhcpEnabled" class="flex-row" style="gap: 20px; flex-wrap: wrap">
+          <div v-if="config.dhcpv4.enabled" class="flex-row" style="gap: 20px; flex-wrap: wrap">
 
       <!-- DHCP Range -->
       <pf-card class="pf-v6-u-mb-md">
@@ -18,9 +18,8 @@
                 <input
                   id="dhcp-start-ip"
                   type="text"
-                  :model-value="config.dhcpRange.start"
-                  @update:model-value="handleDhcpRangeChange('start', $event)"
-                  placeholder="0.0.0.0"
+                  v-model="config.dhcpv4.start"
+                                    placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeStart }"
                   style="width: 100%;"
                 />
@@ -34,9 +33,8 @@
                 <input
                   id="dhcp-end-ip"
                   type="text"
-                  :model-value="config.dhcpRange.end"
-                  @update:model-value="handleDhcpRangeChange('end', $event)"
-                  placeholder="0.0.0.0"
+                  v-model="config.dhcpv4.end"
+                                    placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeEnd }"
                   style="width: 100%;"
                 />
@@ -50,9 +48,8 @@
                 <input
                   id="dhcp-netmask"
                   type="text"
-                  :model-value="config.dhcpRange.netmask"
-                  @update:model-value="handleDhcpRangeChange('netmask', $event)"
-                  placeholder="255.255.255.0"
+                  v-model="config.dhcpv4.netmask"
+                                    placeholder="255.255.255.0"
                   :class="{ 'pf-m-error': errors.dhcpRangeNetmask }"
                   style="width: 100%;"
                 />
@@ -66,9 +63,8 @@
                 <input
                   id="dhcp-gateway"
                   type="text"
-                  :model-value="config.router"
-                  @update:model-value="config.router = $event"
-                  placeholder="0.0.0.0"
+                  v-model="config.dhcpv4.router"
+                                    placeholder="0.0.0.0"
                   :class="{ 'pf-m-error': errors.router }"
                   style="width: 100%;"
                 />
@@ -84,9 +80,8 @@
                 <input
                   type="text"
                   id="domain-name"
-                  :model-value="config.domainName"
-                  @update:model-value="config.domainName = $event"
-                  placeholder="office.local"
+                  v-model="config.domain"
+                                    placeholder="office.local"
                   style="width: 100%;"
                 />
               </pf-form-control>
@@ -96,9 +91,8 @@
                 <input
                   id="dhcp-lease-time"
                   type="text"
-                  :model-value="config.leaseTime"
-                  @update:model-value="config.leaseTime = $event"
-                  placeholder="24h"
+                  v-model="config.dhcpv4.leaseTime"
+                                    placeholder="24h"
                   :class="{ 'pf-m-error': errors.dhcpLeaseTime }"
                   style="width: 100%;"
                 />
@@ -112,8 +106,8 @@
                 <input
                   type="number"
                   id="dhcp-lease-max"
-                  :model-value="config.dhcpLeaseMax"
-                  @update:model-value="config.dhcpLeaseMax = parseInt($event) || 0"
+                  v-model="config.dhcpLeaseMax"
+                  @updatev-model="config.dhcpLeaseMax = parseInt($event) || 0"
                   min="1"
                   max="10000"
                   :class="{ 'pf-m-error': errors.dhcpLeaseMax }"
@@ -132,7 +126,7 @@
       <pf-card style="width: 200px">
         <pf-card-title>DNS Servers</pf-card-title>
         <pf-card-body>
-          <EditList ref="editDns" @changed="config.dnsServers = $event" :items="config.dnsServers" placeholder="8.8.8.8" />
+          <EditList ref="editDns" @changed="config.dhcpv4.dnsServers = $event" :items="config.dhcpv4.dnsServers" placeholder="8.8.8.8" />
         </pf-card-body>
       </pf-card>
 
@@ -140,7 +134,7 @@
       <pf-card style="width: 200px">
         <pf-card-title>NTP Servers</pf-card-title>
         <pf-card-body>
-          <EditList ref="editNtp" @changed="config.ntpServers = $event" :items="config.ntpServers" placeholder="0.0.0.0" />
+          <EditList ref="editNtp" @changed="config.dhcpv4.ntpServers = $event" :items="config.dhcpv4.ntpServers" placeholder="0.0.0.0" />
         </pf-card-body>
       </pf-card>
 
@@ -153,23 +147,9 @@ import { nextTick, ref, watch } from 'vue'
 import EditList from '../ui/EditList.vue'
 
 const props = defineProps({
+  //Config struture in src\model\dnsmasq-config.js
   initialConfig: {
-    type: Object,
-    default: () => ({
-      dhcpEnabled: false,
-      interfaces: [],
-      dhcpRange: {
-        start: '',
-        end: '',
-        netmask: '',
-        leaseTime: ''
-      },
-      router: '',
-      dnsServers: [],
-      ntpServers: [],
-      domainName: '',
-      dhcpLeaseMax: 0
-    })
+    type: Object
   },
   onSave: {
     type: Function,
@@ -188,14 +168,14 @@ watch(() => props.initialConfig, (newConfig) => {
 }, { deep: true })
 
 const validateIpAddress = (ip) => {
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/
-  if (!ipRegex.test(ip)) return false
+  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (!ipRegex.test(ip)) return false;
   
-  const parts = ip.split('.')
+  const parts = ip.split('.');
   return parts.every(part => {
-    const num = parseInt(part, 10)
-    return num >= 0 && num <= 255
-  })
+    const num = parseInt(part, 10);
+    return num >= 0 && num <= 255;
+  });
 }
 
 function validateForm() {
@@ -207,31 +187,31 @@ function validateForm() {
   }
 
   // Validate DHCP range
-  if (!config.value.dhcpRange.start || !validateIpAddress(config.value.dhcpRange.start)) {
+  if (!config.value.dhcpv4.start || !validateIpAddress(config.value.dhcpv4.start)) {
     newErrors.dhcpRangeStart = 'Valid start IP address is required'
   }
-  if (!config.value.dhcpRange.end || !validateIpAddress(config.value.dhcpRange.end)) {
+  if (!config.value.dhcpv4.end || !validateIpAddress(config.value.dhcpv4.end)) {
     newErrors.dhcpRangeEnd = 'Valid end IP address is required'
   }
-  if (!config.value.dhcpRange.netmask || !validateIpAddress(config.value.dhcpRange.netmask)) {
+  if (!config.value.dhcpv4.netmask || !validateIpAddress(config.value.dhcpv4.netmask)) {
     newErrors.dhcpRangeNetmask = 'Valid netmask is required'
   }
-  if (config.value.router && !validateIpAddress(config.value.router)) {
+  if (config.value.dhcpv4.router && !validateIpAddress(config.value.dhcpv4.router)) {
     newErrors.router = 'Invalid gateway'
   }
-  if (config.value.leaseTime && !validateLeaseTime(config.value.leaseTime)) {
+  if (config.value.dhcpv4.leaseTime && !validateLeaseTime(config.value.dhcpv4.leaseTime)) {
     newErrors.dhcpLeaseTime = 'Valid lease time required (e.g., 24h, 7d)'
   }
 
   // Validate DNS servers
-  if (config.value.dnsServers && config.value.dnsServers.length > 0) {
-    config.value.dnsServers.forEach((dns, index) => {
+  if (config.value.dhcpv4.dnsServers && config.value.dhcpv4.dnsServers.length > 0) {
+    config.value.dhcpv4.dnsServers.forEach((dns, index) => {
       if (!validateIpAddress(dns)) {
         newErrors[`dns-${index}`] = 'Valid DNS server IP address is required'
       }
     })
   }
-  // Validate DHCP lease max
+    // Validate DHCP lease max
   if (config.value.dhcpLeaseMax < 1 || config.value.dhcpLeaseMax > 10000) {
     newErrors.dhcpLeaseMax = 'DHCP lease max must be between 1 and 10000'
   }
@@ -247,13 +227,13 @@ async function getConfig() {
 }
 
 const validateLeaseTime = (leaseTime) => {
-  const leaseRegex = /^(\d+)([hmd])$/
+  const leaseRegex = /^(\d+)([hmd])$/;
   return leaseRegex.test(leaseTime)
 }
 
 const handleDhcpRangeChange = (field, value) => {
-  config.value.dhcpRange = {
-    ...config.value.dhcpRange,
+  config.value.dhcpv4 = {
+    ...config.value.dhcpv4,
     [field]: value
   }
 }
